@@ -10,3 +10,8 @@ npm install tailwindcss @tailwindcss/cli
 ```
 npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css --watch
 ```
+
+3. Tambahkan link ini di index agar terhubung ke css (`kalau sudah ada diganti`)
+```
+<link href="../src/output.css" rel="stylesheet">
+```
