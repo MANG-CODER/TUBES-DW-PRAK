@@ -15,19 +15,20 @@ let completePage = 1;
 // ✅ RENDER CARD
 function renderCard(container, anime, type = "ongoing") {
   container.innerHTML += `
-    <div class="bg-slate-900 rounded-xl overflow-hidden hover:scale-105 transition">
-      <img src="${anime.poster}" class="w-full h-60 object-cover">
-      <div class="p-3">
-        <h3 class="text-sm font-bold line-clamp-2">${anime.title}</h3>
-        ${
-          type === "ongoing"
-            ? `<p class="text-xs text-gray-400">${anime.current_episode}</p>`
-            : `<p class="text-xs text-yellow-400">⭐ ${anime.rating}</p>`
-        }
+    <a href="detail.html?slug=${anime.slug}" class="block group">
+      <div class="bg-slate-900 rounded-xl overflow-hidden hover:scale-105 transition">
+        <img src="${anime.poster}" class="w-full h-60 object-cover">
+        <div class="p-3">
+          <h3 class="text-sm font-bold line-clamp-2 group-hover:text-purple-400">
+            ${anime.title}
+          </h3>
+          <p class="text-xs text-gray-400">${anime.current_episode}</p>
+        </div>
       </div>
-    </div>
+    </a>
   `;
 }
+
 
 // ✅ PAGINATION
 function renderPagination(container, currentPage, callbackName) {
