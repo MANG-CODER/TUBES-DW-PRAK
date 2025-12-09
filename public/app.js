@@ -3,6 +3,8 @@ const completeList = document.getElementById("completeList");
 const ongoingPagination = document.getElementById("ongoingPagination");
 const completePagination = document.getElementById("completePagination");
 const searchInput = document.getElementById("searchInput");
+const pageTitle = document.getElementById("pageTitle");
+const pageTitle1 = document.getElementById("pageTitle1");
 
 const ONGOING_API = "https://www.sankavollerei.com/anime/ongoing-anime";
 const COMPLETE_API = "https://www.sankavollerei.com/anime/complete-anime";
@@ -132,43 +134,66 @@ async function getComplete(page = 1) {
 
 // ✅ SEARCH NAVBAR
 searchInput.addEventListener("keyup", async function () {
-  const q = this.value.trim();
+  const q = this.value.trim();
 
-  if (q.length < 3) {
-    getOngoing();
-    getComplete();
-    return;
-  }
+  if (q.length < 3) {
+    // 1. Tampilkan judul jika pencarian dibatalkan
+    if (pageTitle) pageTitle.hidden = false;
+    if (pageTitle1) pageTitle1.hidden = false;
+    
+    getOngoing();
+    getComplete();
+    return;
+  }
 
-  const cacheKey = `search-${q}`;
-  const cachedData = getCache(cacheKey, 1000 * 60 * 5); // search cache 5 menit
-  if (cachedData) {
-    ongoingList.innerHTML = "";
-    completeList.innerHTML = "";
-    ongoingPagination.innerHTML = "";
-    completePagination.innerHTML = "";
-    cachedData.data.forEach((anime) =>
-      renderCard(ongoingList, anime, "ongoing")
-    );
-    return;
-  }
+  // 2. Sembunyikan judul saat pencarian dimulai
+  if (pageTitle) pageTitle.hidden = true;
+  if (pageTitle1) pageTitle1.hidden = true; 
+    
+  const cacheKey = `search-${q}`;
+  const cachedData = getCache(cacheKey, 1000 * 60 * 5); // search cache 5 menit
+  
+  if (cachedData) {
+    // Bersihkan semua list
+    ongoingList.innerHTML = "";
+    completeList.innerHTML = "";
+    ongoingPagination.innerHTML = "";
+    completePagination.innerHTML = "";
+    
+    // Render hasil pencarian (kita gunakan ongoingList sebagai tempat penampung)
+    cachedData.data.forEach((anime) =>
+      renderCard(ongoingList, anime, "ongoing")
+    );
+    return;
+  }
 
-  try {
-    const res = await fetch(`${SEARCH_API}${q}`);
-    const data = await res.json();
-    setCache(cacheKey, data);
+  try {
+    const res = await fetch(`${SEARCH_API}${q}`);
+    const data = await res.json();
+    setCache(cacheKey, data);
 
-    ongoingList.innerHTML = "";
-    completeList.innerHTML = "";
-    ongoingPagination.innerHTML = "";
-    completePagination.innerHTML = "";
+    // Bersihkan semua list
+    ongoingList.innerHTML = "";
+    completeList.innerHTML = "";
+    ongoingPagination.innerHTML = "";
+    completePagination.innerHTML = "";
 
-    data.data.forEach((anime) => renderCard(ongoingList, anime, "ongoing"));
-  } catch (err) {
-    console.error(err);
-  }
+    // 3. Render hasil pencarian dan tambahkan penanganan kosong
+    if (data.data && data.data.length > 0) {
+        data.data.forEach((anime) => renderCard(ongoingList, anime, "ongoing"));
+    } else {
+        ongoingList.innerHTML = "<p class='text-center w-full'>Tidak ditemukan anime dengan kata kunci tersebut.</p>";
+    }
+
+  } catch (err) {
+    console.error(err);
+    ongoingList.innerHTML = "<p class='text-center w-full'>Terjadi kesalahan saat mencari.</p>";
+  }
 });
 
 // ✅ LOAD AWAL
 getOngoing();
 getComplete();
+
+
+

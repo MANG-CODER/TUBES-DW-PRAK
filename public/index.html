@@ -2,14 +2,14 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>AnimeStream</title>
+  <title>MangNime</title>
   <link href="../src/output.css" rel="stylesheet">
 </head>
 <body class="bg-slate-950 text-white">
 
 <!-- ✅ NAVBAR -->
 <nav class="bg-slate-900 px-8 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-  <h1 class="text-2xl font-bold text-purple-400">MangNime</h1>
+    <img style="height: 3rem; width: auto;" src="./img/Logo MangNime.png" alt="MangNime">
 
   <!-- MENU -->
   <div class="flex gap-6 text-sm font-semibold">
@@ -17,25 +17,27 @@
     <a href="ongoing.html" class="hover:text-purple-400">Ongoing</a>
     <a href="complete.html" class="hover:text-purple-400">Complete</a>
     <a href="movie.html" class="hover:text-purple-400">Movie</a>
+    <a href="genre.html" class="hover:text-purple-400">Genre</a>
+    <a href="schedule.html" class="hover:text-purple-400">Schedule</a>
   </div>
 
-  <!-- ✅ SEARCH -->
+  <!-- SEARCH -->
   <input id="searchInput" type="text" placeholder="Cari anime..."
     class="px-4 py-2 rounded-lg bg-slate-800 outline-none text-sm w-64">
 </nav>
 
-<!-- ✅ ONGOING -->
+<!-- ONGOING -->
 <section class="p-10">
-  <h2 class="text-2xl font-bold mb-6">🔥 Ongoing Anime</h2>
+  <h2 id="pageTitle" class="text-2xl font-bold mb-6">🔥 Ongoing Anime</h2>
   <div id="ongoingList" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
 
-  <!-- ✅ PAGINATION -->
+  <!-- PAGINATION -->
   <div id="ongoingPagination" class="flex justify-center gap-3 mt-8"></div>
 </section>
 
-<!-- ✅ COMPLETE -->
+<!-- COMPLETE -->
 <section class="p-10 pt-0">
-  <h2 class="text-2xl font-bold mb-6">✅ Complete Anime</h2>
+  <h2 id="pageTitle1" class="text-2xl font-bold mb-6">✅ Complete Anime</h2>
   <div id="completeList" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
 
   <!-- ✅ PAGINATION -->
