@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+.navbar li{
+  align-items: center;
+}
+
+.navbar li a {
+  font-weight: 600;
+  color: white;
+  padding-right: 50px;
+}
+
+.navbar li a:hover {
+  font-weight: 600;
+  color: #ffd230;
+}

@@ -3,11 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="./output.css" rel="stylesheet">
+  <link href="../src/output.css" rel="stylesheet">
 </head>
-<body>
-  <header>
-    
-  </header>
+<body class="bg-gray-800">
+  <div class="flex justify-between bg-linear-to-r/hsl from-indigo-500 to-teal-400 px-20 py-5">
+    <h1 class="text-2xl font-bold pr-10 w-50 text-amber-300">MangNime</h1>
+
+    <ul class="navbar flex items-center">
+      <li><a class="" href="#">HOME</a></li>
+      <li><a class="" href="#">ANIME LIST</a></li>
+      <li><a class="" href="#">JADWAL RILIS</a></li>
+      <li><a class="" href="#">GENRE LIST</a></li>
+    </ul>
+
+    <div>
+      <input class="border-2 border-gray-700 rounded-3xl px-5 py-2 w-64 bg-gray-600 text-white" type="text" placeholder="Search">
+    </div>
+  </div>
+
+  <div class="flex justify-center h-96 bg-gray-400 mx-20 my-5 rounded-2xl">
+    <img src="" alt="">
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mx-20">
+
+    <div class="bg-gray-400 md:col-span-2 p-4">
+      <div class="flex justify-between align-center items-center">
+        <h1 class="text-1xl font-bold">ON-GOING ANIME</h1>
+        <button class="border-2 border-gray-700 rounded-lg px-5 py-2 w-72 bg-gray-600 text-white" type="submit">CEK ANIME ON-GOING LAINNYA</button>
+      </div>
+    </div>
+
+    <div class="bg-gray-400 md:row-span-2 p-4">
+      <div>
+
+      </div>
+    </div>
+
+    <div class="bg-gray-400 md:col-span-2 p-4">
+      <div class="flex justify-between align-center items-center">
+        <h1 class="text-1xl font-bold">COMPLETED ANIME</h1>
+        <button class="border-2 border-gray-700 rounded-lg px-5 py-2 w-72 bg-gray-600 text-white" type="submit">CEK ANIME COMPLETED LAINNYA</button>
+      </div>
+    </div>
+
+  </div>
+
 </body>
 </html>
