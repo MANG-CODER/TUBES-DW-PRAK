@@ -2,29 +2,107 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Tonton Anime</title>
+  <title>Nonton Anime - MangNime</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="../src/output.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="./img/Icon MangNime.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 
-<body class="bg-slate-950 text-white min-h-screen">
+<body class="bg-slate-950 text-slate-200 font-['Inter'] min-h-screen flex flex-col">
 
-  <div class="max-w-4xl mx-auto p-6">
+  <nav class="bg-slate-900/50 backdrop-blur-md border-b border-slate-800 px-4 py-3 mb-4">
+      <div class="max-w-6xl mx-auto flex items-center justify-between">
+          <div class="flex items-center gap-2">
+              <a href="index.html" class="flex-shrink-0">
+                <img class="h-10 w-auto hover:scale-105 transition-transform" src="./img/Logo MangNime.png" alt="MangNime">
+              </a>
+          </div>
+      </div>
+  </nav>
 
-    <!-- Judul Episode -->
-    <h1 id="episodeTitle" class="text-3xl font-bold mb-3">Memuat...</h1>
-    <p id="episodeDate" class="text-gray-400 mb-6"></p>
+  <div class="max-w-6xl mx-auto w-full px-4 md:px-6 flex-grow pb-10">
+    
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div class="space-y-3 w-full md:w-auto">
+            
+            <a href="javascript:history.back()" 
+               class="group inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-full text-sm font-medium transition-all duration-300 border border-slate-700 hover:border-slate-600 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Kembali
+            </a>
 
-    <!-- VIDEO (Hidden sampai server dipilih) -->
-    <div id="videoContainer" class="hidden w-full aspect-video bg-black rounded-xl overflow-hidden mb-8">
-      <iframe id="videoFrame" class="w-full h-full" allowfullscreen></iframe>
+            <div>
+                <h1 id="episodeTitle" class="text-xl md:text-2xl font-bold text-white line-clamp-1 leading-tight">Memuat Player...</h1>
+                <p id="releaseTime" class="text-slate-500 text-xs flex items-center gap-2 mt-1">
+                    <span class="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
+                    Please wait...
+                </p>
+            </div>
+        </div>
+        
+        <div class="flex gap-3 w-full md:w-auto mt-2 md:mt-0">
+            <a id="btnPrev" href="#" class="hidden flex-1 md:flex-none justify-center px-5 py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-sm font-semibold transition items-center gap-2 border border-slate-700 hover:text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                Prev
+            </a>
+            <a id="btnNext" href="#" class="hidden flex-1 md:flex-none justify-center px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-xl text-sm font-semibold transition items-center gap-2 text-white shadow-lg shadow-purple-900/30 hover:shadow-purple-900/50">
+                Next
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </a>
+        </div>
     </div>
 
-    <!-- SERVER LIST -->
-    <h2 class="text-2xl font-bold mb-3">Pilih Server Streaming</h2>
-    <div id="serverList" class="flex flex-wrap gap-3"></div>
+    <div class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-[0_0_40px_-10px_rgba(147,51,234,0.3)] border border-slate-800 z-10 group">
+      
+      <div id="videoLoader" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 z-0">
+          <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-4"></div>
+          <p class="text-slate-400 text-sm animate-pulse">Memuat Stream...</p>
+      </div>
+      
+      <iframe 
+        id="videoFrame" 
+        class="absolute top-0 left-0 w-full h-full z-20" 
+        src="" 
+        frameborder="0" 
+        allowfullscreen="true" 
+        webkitallowfullscreen="true" 
+        mozallowfullscreen="true"
+        scrolling="no">
+      </iframe>
+    </div>
+
+    <div class="mt-8 bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+        <div class="flex items-center gap-3 mb-6 border-b border-slate-800 pb-4">
+            <div class="p-2 bg-purple-500/10 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+            </div>
+            <div>
+                <h2 class="text-lg font-bold text-white">Server Streaming</h2>
+                <p class="text-xs text-slate-400">Pilih resolusi jika video macet</p>
+            </div>
+        </div>
+        
+        <div id="serverContainer" class="space-y-4">
+            <div class="animate-pulse space-y-3">
+                <div class="h-4 w-24 bg-slate-800 rounded"></div>
+                <div class="flex gap-2">
+                    <div class="h-10 w-24 bg-slate-800 rounded-lg"></div>
+                    <div class="h-10 w-24 bg-slate-800 rounded-lg"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
   </div>
+
+  <footer class="text-center py-6 text-slate-500 text-xs border-t border-slate-900 mt-auto bg-slate-950">
+      &copy; 2024 MangNime Streaming
+  </footer>
 
   <script src="watch.js"></script>
 </body>
