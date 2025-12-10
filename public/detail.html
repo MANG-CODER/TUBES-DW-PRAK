@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Detail Anime</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="../src/output.css" rel="stylesheet">
+</head>
+
+<body class="bg-slate-950 text-white min-h-screen">
+
+<!-- NAVBAR -->
+<nav class="bg-slate-900 px-8 py-4 flex justify-between items-center shadow-lg">
+  <a href="index.html">
+    <img style="height: 3rem;" src="./img/Logo MangNime.png" alt="MangNime">
+  </a>
+  <h1 class="text-xl font-semibold">Detail Anime</h1>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="w-full flex justify-center px-6 md:px-14">
+  <div class="w-full max-w-5xl py-10 space-y-10">
+
+    <!-- HEADER -->
+    <div class="flex flex-col md:flex-row gap-6">
+      <img id="animePoster"
+           class="w-56 h-80 object-cover rounded-xl shadow-xl bg-slate-800" />
+
+      <div class="space-y-3">
+        <h2 id="animeTitle" class="text-3xl font-bold"></h2>
+
+        <p>Status: <span id="animeStatus" class="text-purple-400"></span></p>
+        <p>Studio: <span id="animeStudios" class="text-purple-400"></span></p>
+        <p>Aired: <span id="animeAired" class="text-purple-400"></span></p>
+        <p>Episodes: <span id="animeEpisodes" class="text-purple-400"></span></p>
+        <p>Duration: <span id="animeDuration" class="text-purple-400"></span></p>
+        <p>Score: <span id="animeScore" class="text-purple-400"></span></p>
+
+        <div class="flex flex-wrap gap-2" id="genreList"></div>
+
+        <a id="detailWatch"
+           class="inline-block bg-purple-600 px-6 py-3 rounded-lg hover:bg-purple-700 transition cursor-pointer">
+          Tonton Sekarang
+        </a>
+      </div>
+    </div>
+
+    <!-- EPISODES -->
+    <div>
+      <h3 class="text-xl font-semibold mb-4">Episode</h3>
+      <div id="episodeList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
+    </div>
+
+    <!-- BATCH DOWNLOAD -->
+    <div>
+      <h3 class="text-xl font-semibold mb-4">Download Batch</h3>
+      <div id="batchBox"></div>
+    </div>
+
+    <!-- RECOMMENDATIONS -->
+    <div>
+      <h3 class="text-xl font-semibold mb-4">Rekomendasi Lain</h3>
+      <div id="recommendedList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
+    </div>
+
+  </div>
+</main>
+
+<script src="detail.js"></script>
+</body>
+</html>
