@@ -20,7 +20,7 @@
   </a>
 
   <div class="flex gap-6 text-sm font-semibold">
-    <a href="index.html" class="text-purple-400">Home</a>
+    <a href="index.html" class="hover:text-purple-400">Home</a>
     <a href="ongoing.html" class="hover:text-purple-400">Ongoing</a>
     <a href="complete.html" class="hover:text-purple-400">Complete</a>
     <a href="movie.html" class="hover:text-purple-400">Movie</a>
@@ -32,83 +32,96 @@
     class="px-4 py-2 rounded-lg bg-slate-800 outline-none text-sm w-64">
 </nav>
 
-<!-- ✅ WRAPPER LAYAR + PADDING -->
+<!-- ✅ WRAPPER -->
 <main class="w-full flex justify-center px-6 md:px-14"> 
   <div class="w-full max-w-6xl px-6 pt-24 pb-20 space-y-14">
 
     <!-- ✅ HEADER DETAIL -->
     <section class="flex flex-col md:flex-row items-start gap-10 w-full">
 
-    <!-- ✅ COVER FIXED & SERAGAM -->
-<div class="flex-shrink-0 pt-10">
-  <div class="w-[260px] h-[380px] min-w-[260px] min-h-[380px] 
-              rounded-2xl shadow-2xl border border-white/10 
-              overflow-hidden bg-slate-800 flex items-center justify-center">
+      <!-- ✅ COVER -->
+      <div class="flex-shrink-0 pt-10">
+        <div class="w-[260px] h-[380px] min-w-[260px] min-h-[380px] 
+                    rounded-2xl shadow-2xl border border-white/10 
+                    overflow-hidden bg-slate-800 flex items-center justify-center">
 
-    <img
-      id="detailCover"
-      alt="Cover Anime"
-      class="w-full h-full object-cover"
-    />
+          <img
+            id="animePoster"
+            alt="Cover Anime"
+            class="w-full h-full object-cover"
+          />
 
-  </div>
-</div>
+        </div>
+      </div>
 
       <!-- ✅ INFO KANAN -->
       <div class="flex-1 space-y-4 px-4 md:px-8 pt-10">
 
-        <h1 id="detailTitle" class="text-3xl md:text-4xl font-medium leading-tight"></h1>
+        <h1 id="animeTitle" class="text-3xl md:text-4xl font-medium leading-tight"></h1>
 
-        <div id="detailGenres" class="flex flex-wrap gap-2"></div>
-
-        <p id="detailDesc" class="text-gray-300 leading-relaxed"></p>
+        <!-- ✅ GENRE -->
+        <div id="genreList" class="flex flex-wrap gap-2"></div>
 
         <!-- ✅ META INFO -->
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm text-gray-300 pt-2">
-          <div><p class="text-gray-400">Status</p><b id="detailStatus"></b></div>
-          <div><p class="text-gray-400">Studio</p><b id="detailStudio"></b></div>
-          <div><p class="text-gray-400">Rilis</p><b id="detailSeason"></b></div>
-          <div><p class="text-gray-400">Episode</p><b id="detailEpisode"></b></div>
-          <div><p class="text-gray-400">Durasi</p><b id="detailDuration"></b></div>
-          <div><p class="text-gray-400">Rating</p><b id="detailRating"></b></div>
+          <div><p class="text-gray-400">Status</p><b id="animeStatus"></b></div>
+          <div><p class="text-gray-400">Studio</p><b id="animeStudios"></b></div>
+          <div><p class="text-gray-400">Rilis</p><b id="animeAired"></b></div>
+          <div><p class="text-gray-400">Episode</p><b id="animeEpisodes"></b></div>
+          <div><p class="text-gray-400">Durasi</p><b id="animeDuration"></b></div>
+          <div><p class="text-gray-400">Rating</p><b id="animeScore"></b></div>
         </div>
 
-        <!-- ✅ BUTTON -->
+        <!-- ✅ BUTTON TONTON (AUTO EPISODE TERBARU) -->
         <a
-  id="detailWatch"
-  target="_blank"
-  class="inline-flex items-center gap-2 mt-6 px-10 py-3
-         rounded-full
-         bg-gradient-to-r from-purple-600 to-indigo-600
-         hover:from-purple-500 hover:to-indigo-500
-         text-sm font-semibold
-         shadow-lg hover:shadow-purple-500/30
-         transition-all duration-300"
->
-  ▶ Tonton Sekarang
-</a>
-
+          id="detailWatch"
+          target="_blank"
+          class="inline-flex items-center gap-2 mt-6 px-10 py-3
+                 rounded-full
+                 bg-gradient-to-r from-purple-600 to-indigo-600
+                 hover:from-purple-500 hover:to-indigo-500
+                 text-sm font-semibold
+                 shadow-lg hover:shadow-purple-500/30
+                 transition-all duration-300"
+        >
+          ▶ Tonton Sekarang
+        </a>
 
       </div>
     </section>
 
     <!-- ✅ EPISODE LIST -->
-<section class="px-4 md:px-12">
-  <h2 class="text-2xl font-semibold mb-5">Daftar Episode</h2>
+    <section class="px-4 md:px-12">
+      <h2 class="text-2xl font-semibold mb-5">Daftar Episode</h2>
 
-  <div
-    id="episodeList"
-    class="grid 
-           grid-cols-2 
-           sm:grid-cols-3 
-           md:grid-cols-4 
-           lg:grid-cols-5
-           gap-x-6 
-           gap-y-6
-           w-full"
-  >
-  </div>
-</section>
+      <div
+        id="episodeList"
+        class="grid 
+               grid-cols-2 
+               sm:grid-cols-3 
+               md:grid-cols-4 
+               lg:grid-cols-5
+               gap-x-6 
+               gap-y-6
+               w-full"
+      >
+      </div>
+    </section>
+
+    <!-- ✅ BATCH DOWNLOAD -->
+    <section class="px-4 md:px-12">
+      <h2 class="text-2xl font-semibold mb-5">Download Batch</h2>
+      <div id="batchBox"></div>
+    </section>
+
+    <!-- ✅ REKOMENDASI -->
+    <section class="px-4 md:px-12">
+      <h2 class="text-2xl font-semibold mb-5">Rekomendasi Anime</h2>
+      <div id="recommendedList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6"></div>
+    </section>
+
+    <div id="animeDetail"></div>
+
   </div>
 </main>
 

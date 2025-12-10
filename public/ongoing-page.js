@@ -5,7 +5,7 @@ const completePagination = document.getElementById("completePagination");
 const searchInput = document.getElementById("searchInput");
 const pageTitle = document.getElementById("pageTitle");
 
-const ONGOING_API = "https://www.sankavollerei.com/anime/ongoing-anime";
+const ONGOING_API = "https://www.sankavollerei.com/anime/ongoing-anime/";
 const COMPLETE_API = "https://www.sankavollerei.com/anime/complete-anime";
 const SEARCH_API = "https://www.sankavollerei.com/anime/search/";
 
@@ -13,21 +13,24 @@ let ongoingPage = 1;
 let completePage = 1;
 
 // ✅ RENDER CARD
-function renderCard(container, anime, type = "ongoing") {
+function renderCard(container, anime) {
+  const slug = anime.href.split("/").pop(); // ✅ AMBIL SLUG YANG VALID
+
   container.innerHTML += `
-    <a href="detail.html?slug=${anime.slug}" class="block group">
+    <a href="detail.html?slug=${slug}" class="block group">
       <div class="bg-slate-900 rounded-xl overflow-hidden hover:scale-105 transition">
         <img src="${anime.poster}" class="w-full h-60 object-cover">
         <div class="p-3">
           <h3 class="text-sm font-bold line-clamp-2 group-hover:text-purple-400">
             ${anime.title}
           </h3>
-          <p class="text-xs text-gray-400">${anime.current_episode}</p>
         </div>
       </div>
     </a>
   `;
 }
+
+
 
 
 // ✅ PAGINATION
@@ -75,7 +78,7 @@ async function getOngoing(page = 1) {
 
   if (cachedData) {
     ongoingList.innerHTML = "";
-    cachedData.data.ongoingAnimeData.forEach((anime) =>
+    cachedData.data.animeList.forEach((anime) =>
       renderCard(ongoingList, anime, "ongoing")
     );
     renderPagination(ongoingPagination, ongoingPage, "getOngoing");
@@ -89,7 +92,7 @@ async function getOngoing(page = 1) {
     setCache(cacheKey, data);
 
     ongoingList.innerHTML = "";
-    data.data.ongoingAnimeData.forEach((anime) =>
+    data.data.animeList.forEach((anime) =>
       renderCard(ongoingList, anime, "ongoing")
     );
     renderPagination(ongoingPagination, ongoingPage, "getOngoing");
@@ -108,7 +111,7 @@ async function getComplete(page = 1) {
 
   if (cachedData) {
     completeList.innerHTML = "";
-    cachedData.data.completeAnimeData.forEach((anime) =>
+    cachedData.data.animeList.forEach((anime) =>
       renderCard(completeList, anime, "complete")
     );
     renderPagination(completePagination, completePage, "getComplete");
@@ -122,7 +125,7 @@ async function getComplete(page = 1) {
     setCache(cacheKey, data);
 
     completeList.innerHTML = "";
-    data.data.completeAnimeData.forEach((anime) =>
+    data.data.animeList.forEach((anime) =>
       renderCard(completeList, anime, "complete")
     );
     renderPagination(completePagination, completePage, "getComplete");

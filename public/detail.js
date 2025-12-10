@@ -1,126 +1,128 @@
+// ✅ AMBIL SLUG DARI URL
 const params = new URLSearchParams(window.location.search);
 const slug = params.get("slug");
 
-if (!slug) {
-  alert("Anime tidak ditemukan!");
-  window.location.href = "index.html";
-}
+// ✅ API
+const DETAIL_API = "https://www.sankavollerei.com/anime/anime/";
 
-const API_DETAIL = `https://www.sankavollerei.com/anime/anime/${slug}`;
+// ✅ ELEMEN HTML
+const poster = document.getElementById("animePoster");
+const title = document.getElementById("animeTitle");
+const status = document.getElementById("animeStatus");
+const studio = document.getElementById("animeStudios");
+const aired = document.getElementById("animeAired");
+const episode = document.getElementById("animeEpisodes");
+const duration = document.getElementById("animeDuration");
+const score = document.getElementById("animeScore");
+const genreList = document.getElementById("genreList");
+const watchBtn = document.getElementById("detailWatch");
 
-/* ============================
-   ✅ CACHE SYSTEM (30 MENIT)
-============================ */
+const episodeList = document.getElementById("episodeList");
+const batchBox = document.getElementById("batchBox");
+const recommendedList = document.getElementById("recommendedList");
+
+// ✅ CACHE
 function setCache(key, data) {
-  const cache = {
-    timestamp: Date.now(),
-    data: data,
-  };
-  localStorage.setItem(key, JSON.stringify(cache));
+  localStorage.setItem(key, JSON.stringify({ time: Date.now(), data }));
 }
 
-function getCache(key, maxAge = 1000 * 60 * 30) {
-  const cached = localStorage.getItem(key);
-  if (!cached) return null;
+function getCache(key, maxAge = 1000 * 60 * 20) {
+  const cache = localStorage.getItem(key);
+  if (!cache) return null;
 
-  const parsed = JSON.parse(cached);
-  if (Date.now() - parsed.timestamp > maxAge) return null;
+  const parsed = JSON.parse(cache);
+  if (Date.now() - parsed.time > maxAge) return null;
 
   return parsed.data;
 }
 
-/* ============================
-   ✅ LOAD DETAIL
-============================ */
-async function loadDetail() {
+// ✅ FETCH DETAIL
+async function getAnimeDetail() {
+  if (!slug) return;
+
   const cacheKey = `detail-${slug}`;
-  const cachedData = getCache(cacheKey);
+  const cached = getCache(cacheKey);
+
+  if (cached) {
+    renderDetail(cached);
+    return;
+  }
 
   try {
-    if (cachedData) {
-      renderDetail(cachedData);
-      return;
-    }
-
-    const res = await fetch(API_DETAIL);
+    const res = await fetch(`${DETAIL_API}${slug}`);
     const json = await res.json();
 
-    console.log("FULL API RESPONSE:", json); // ✅ DEBUG
-
-    const anime = json.data; // ✅ SESUAI JSON KAMU
-
+    const anime = json.data;
     setCache(cacheKey, anime);
     renderDetail(anime);
   } catch (err) {
     console.error("DETAIL ERROR:", err);
-    alert("Gagal memuat detail anime!");
   }
 }
 
-/* ============================
-   ✅ RENDER DETAIL
-============================ */
+// ✅ RENDER DETAIL (✅ 100% SESUAI JSON)
 function renderDetail(anime) {
-  // ✅ DATA UTAMA
-  document.getElementById("detailCover").src = anime.poster;
-  document.getElementById("detailTitle").textContent = anime.title;
-  document.getElementById("detailDesc").textContent = anime.synopsis;
+  poster.src = anime.poster;
+  title.textContent = anime.title;
 
-  document.getElementById("detailStatus").textContent = anime.status;
-  document.getElementById("detailStudio").textContent = anime.studio;
-  document.getElementById("detailSeason").textContent = anime.release_date;
-  document.getElementById("detailEpisode").textContent = anime.episode_count;
-  document.getElementById("detailDuration").textContent = anime.duration;
-  document.getElementById("detailRating").textContent = anime.rating;
+  status.textContent = anime.status;
+  studio.textContent = anime.studios; // ✅ dari JSON: "studios"
+  aired.textContent = anime.aired;
+  episode.textContent = anime.episodes; // ✅ dari JSON: "episodes"
+  duration.textContent = anime.duration;
+  score.textContent = anime.score; // ✅ dari JSON: "score"
 
-  document.getElementById("detailWatch").href =
-    anime.batch?.otakudesu_url || "#";
-
-  /* ============================
-     ✅ GENRE
-  ============================ */
-  const genreBox = document.getElementById("detailGenres");
-  genreBox.innerHTML = "";
-
-  anime.genres.forEach((g) => {
-    const span = document.createElement("span");
-    span.className = "px-3 py-1 bg-white/10 rounded-full text-xs";
-    span.textContent = g.name;
-    genreBox.appendChild(span);
+  // ✅ GENRE
+  genreList.innerHTML = "";
+  anime.genreList.forEach((g) => {
+    genreList.innerHTML += `
+      <span class="px-3 py-1 text-xs rounded-full bg-purple-700/30 text-purple-300">
+        ${g.title}
+      </span>
+    `;
   });
 
-  /* ============================
-     ✅ ✅ EPISODE LIST (FIX SESUAI JSON)
-  ============================ */
-  const episodeBox = document.getElementById("episodeList");
-  episodeBox.innerHTML = "";
-
-  console.log("EPISODE LIST:", anime.episode_lists); // ✅ DEBUG
-
-  if (anime.episode_lists && anime.episode_lists.length > 0) {
-    anime.episode_lists.forEach((ep) => {
-      episodeBox.innerHTML += `
-        <a href="${ep.otakudesu_url}"
-           target="_blank"
-           class="block p-4 rounded-xl bg-white/5 hover:bg-white/10 transition border border-white/10">
-          
-          <p class="font-semibold text-sm">
-            Episode ${ep.episode_number}
-          </p>
-
-          <p class="text-xs text-gray-400 mt-1">
-            ${ep.episode}
-          </p>
-        </a>
-      `;
-    });
-  } else {
-    episodeBox.innerHTML = `
-      <p class="text-sm text-gray-400 italic">
-        Episode tidak tersedia.
-      </p>
-    `;
+  // ✅ BUTTON TONTON (PAKAI EPISODE TERBARU)
+  if (anime.episodeList.length > 0) {
+    watchBtn.href = anime.episodeList[0].otakudesuUrl;
   }
+
+  // ✅ EPISODE LIST
+  episodeList.innerHTML = "";
+  anime.episodeList.forEach((ep) => {
+    episodeList.innerHTML += `
+      <a href="${ep.otakudesuUrl}" target="_blank"
+        class="bg-slate-900 p-3 rounded-lg hover:bg-purple-700 transition text-center">
+        ${ep.title}
+      </a>
+    `;
+  });
+
+  // ✅ BATCH DOWNLOAD
+  batchBox.innerHTML = `
+    <a href="${anime.batch.otakudesuUrl}" target="_blank"
+      class="inline-block bg-green-600 px-6 py-3 rounded-lg hover:bg-green-700 transition">
+      ⬇ Download Batch
+    </a>
+  `;
+
+  // ✅ REKOMENDASI
+  recommendedList.innerHTML = "";
+  anime.recommendedAnimeList.forEach((rec) => {
+    recommendedList.innerHTML += `
+      <a href="detail.html?slug=${rec.animeId}" class="block group">
+        <div class="bg-slate-900 rounded-xl overflow-hidden hover:scale-105 transition">
+          <img src="${rec.poster}" class="w-full h-48 object-cover">
+          <div class="p-2">
+            <h3 class="text-sm font-bold line-clamp-2 group-hover:text-purple-400">
+              ${rec.title}
+            </h3>
+          </div>
+        </div>
+      </a>
+    `;
+  });
 }
 
-loadDetail();
+// ✅ LOAD
+getAnimeDetail();
