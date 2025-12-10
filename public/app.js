@@ -13,24 +13,32 @@ const SEARCH_API = "https://www.sankavollerei.com/anime/search/";
 let ongoingPage = 1;
 let completePage = 1;
 
-// ✅ RENDER CARD
+/* =============================
+   RENDER CARD
+============================= */
 function renderCard(container, anime, type = "ongoing") {
   container.innerHTML += `
-    <div class="bg-slate-900 rounded-xl overflow-hidden hover:scale-105 transition">
-      <img src="${anime.poster}" class="w-full h-60 object-cover">
-      <div class="p-3">
-        <h3 class="text-sm font-bold line-clamp-2">${anime.title}</h3>
-        ${
-          type === "ongoing"
-            ? `<p class="text-xs text-gray-400">${anime.current_episode}</p>`
-            : `<p class="text-xs text-yellow-400">⭐ ${anime.rating}</p>`
-        }
+    <a href="detail.html?slug=${anime.animeId}" class="block">
+      <div class="bg-slate-900 rounded-xl overflow-hidden hover:scale-105 transition">
+        <img src="${anime.poster}" class="w-full h-60 object-cover">
+        <div class="p-3">
+          <h3 class="text-sm font-bold line-clamp-2">${anime.title}</h3>
+
+          ${
+            type === "ongoing"
+              ? `<p class="text-xs text-gray-400">Episode ${anime.episodes}</p>`
+              : `<p class="text-xs text-yellow-400">⭐ ${anime.score}</p>`
+          }
+
+        </div>
       </div>
-    </div>
+    </a>
   `;
 }
 
-// ✅ PAGINATION
+/* =============================
+   PAGINATION
+============================= */
 function renderPagination(container, currentPage, callbackName) {
   container.innerHTML = `
     <button onclick="${callbackName}(${currentPage - 1})"
@@ -49,14 +57,15 @@ function renderPagination(container, currentPage, callbackName) {
   `;
 }
 
-// ✅ HELPER CACHE
+/* =============================
+   CACHE
+============================= */
 function setCache(key, data) {
   const cache = { timestamp: Date.now(), data };
   localStorage.setItem(key, JSON.stringify(cache));
 }
 
 function getCache(key, maxAge = 1000 * 60 * 25) {
-  // 25 menit
   const cached = localStorage.getItem(key);
   if (!cached) return null;
 
@@ -66,16 +75,18 @@ function getCache(key, maxAge = 1000 * 60 * 25) {
   return parsed.data;
 }
 
-// ✅ FETCH ONGOING
+/* =============================
+   FETCH ONGOING
+============================= */
 async function getOngoing(page = 1) {
   ongoingPage = page;
 
   const cacheKey = `ongoing-page-${page}`;
-  const cachedData = getCache(cacheKey);
+  const cached = getCache(cacheKey);
 
-  if (cachedData) {
+  if (cached) {
     ongoingList.innerHTML = "";
-    cachedData.data.ongoingAnimeData.forEach((anime) =>
+    cached.animeList.forEach((anime) =>
       renderCard(ongoingList, anime, "ongoing")
     );
     renderPagination(ongoingPagination, ongoingPage, "getOngoing");
@@ -84,31 +95,38 @@ async function getOngoing(page = 1) {
 
   try {
     const res = await fetch(`${ONGOING_API}?page=${page}`);
-    const data = await res.json();
+    if (!res.ok) throw new Error("API Ongoing bermasalah");
 
-    setCache(cacheKey, data);
+    const data = await res.json();
+    const ongoingData = data.data;
+
+    setCache(cacheKey, ongoingData);
 
     ongoingList.innerHTML = "";
-    data.data.ongoingAnimeData.forEach((anime) =>
+    ongoingData.animeList.forEach((anime) =>
       renderCard(ongoingList, anime, "ongoing")
     );
+
     renderPagination(ongoingPagination, ongoingPage, "getOngoing");
+
   } catch (err) {
     console.error(err);
-    ongoingList.innerHTML = "❌ Gagal memuat Ongoing";
+    ongoingList.innerHTML = "❌ Gagal memuat Ongoing Anime.";
   }
 }
 
-// ✅ FETCH COMPLETE
+/* =============================
+   FETCH COMPLETE
+============================= */
 async function getComplete(page = 1) {
   completePage = page;
 
   const cacheKey = `complete-page-${page}`;
-  const cachedData = getCache(cacheKey);
+  const cached = getCache(cacheKey);
 
-  if (cachedData) {
+  if (cached) {
     completeList.innerHTML = "";
-    cachedData.data.completeAnimeData.forEach((anime) =>
+    cached.animeList.forEach((anime) =>
       renderCard(completeList, anime, "complete")
     );
     renderPagination(completePagination, completePage, "getComplete");
@@ -116,84 +134,90 @@ async function getComplete(page = 1) {
   }
 
   try {
-    const res = await fetch(`${COMPLETE_API}/${page}`);
-    const data = await res.json();
+    const res = await fetch(`${COMPLETE_API}?page=${page}`);
+    if (!res.ok) throw new Error("API Complete bermasalah");
 
-    setCache(cacheKey, data);
+    const data = await res.json();
+    const completeData = data.data;
+
+    setCache(cacheKey, completeData);
 
     completeList.innerHTML = "";
-    data.data.completeAnimeData.forEach((anime) =>
+    completeData.animeList.forEach((anime) =>
       renderCard(completeList, anime, "complete")
     );
+
     renderPagination(completePagination, completePage, "getComplete");
+
   } catch (err) {
     console.error(err);
-    completeList.innerHTML = "❌ Gagal memuat Complete";
+    completeList.innerHTML = "❌ Gagal memuat Complete Anime.";
   }
 }
 
-// ✅ SEARCH NAVBAR
+
+
+/* =============================
+   SEARCH
+============================= */
 searchInput.addEventListener("keyup", async function () {
-  const q = this.value.trim();
+  const q = this.value.trim();
 
-  if (q.length < 3) {
-    // 1. Tampilkan judul jika pencarian dibatalkan
-    if (pageTitle) pageTitle.hidden = false;
+  if (q.length < 3) {
+    if (pageTitle) pageTitle.hidden = false;
     if (pageTitle1) pageTitle1.hidden = false;
-    
-    getOngoing();
-    getComplete();
-    return;
-  }
 
-  // 2. Sembunyikan judul saat pencarian dimulai
-  if (pageTitle) pageTitle.hidden = true;
-  if (pageTitle1) pageTitle1.hidden = true; 
-    
-  const cacheKey = `search-${q}`;
-  const cachedData = getCache(cacheKey, 1000 * 60 * 5); // search cache 5 menit
-  
-  if (cachedData) {
-    // Bersihkan semua list
-    ongoingList.innerHTML = "";
-    completeList.innerHTML = "";
-    ongoingPagination.innerHTML = "";
-    completePagination.innerHTML = "";
-    
-    // Render hasil pencarian (kita gunakan ongoingList sebagai tempat penampung)
-    cachedData.data.forEach((anime) =>
-      renderCard(ongoingList, anime, "ongoing")
-    );
-    return;
-  }
+    getOngoing();
+    getComplete();
+    return;
+  }
 
-  try {
-    const res = await fetch(`${SEARCH_API}${q}`);
-    const data = await res.json();
-    setCache(cacheKey, data);
+  if (pageTitle) pageTitle.hidden = true;
+  if (pageTitle1) pageTitle1.hidden = true;
 
-    // Bersihkan semua list
-    ongoingList.innerHTML = "";
-    completeList.innerHTML = "";
-    ongoingPagination.innerHTML = "";
-    completePagination.innerHTML = "";
+  const cacheKey = `search-${q}`;
+  const cached = getCache(cacheKey, 1000 * 60 * 5);
 
-    // 3. Render hasil pencarian dan tambahkan penanganan kosong
+  if (cached) {
+    ongoingList.innerHTML = "";
+    completeList.innerHTML = "";
+    ongoingPagination.innerHTML = "";
+    completePagination.innerHTML = "";
+
+    cached.data.forEach((anime) =>
+      renderCard(ongoingList, anime)
+    );
+    return;
+  }
+
+  try {
+    const res = await fetch(`${SEARCH_API}${q}`);
+    if (!res.ok) throw new Error("API Search Error");
+
+    const data = await res.json();
+    setCache(cacheKey, data);
+
+    ongoingList.innerHTML = "";
+    completeList.innerHTML = "";
+    ongoingPagination.innerHTML = "";
+    completePagination.innerHTML = "";
+
     if (data.data && data.data.length > 0) {
-        data.data.forEach((anime) => renderCard(ongoingList, anime, "ongoing"));
+      data.data.forEach((anime) =>
+        renderCard(ongoingList, anime)
+      );
     } else {
-        ongoingList.innerHTML = "<p class='text-center w-full'>Tidak ditemukan anime dengan kata kunci tersebut.</p>";
+      ongoingList.innerHTML = "<p class='text-center w-full'>Tidak ditemukan anime.</p>";
     }
 
-  } catch (err) {
-    console.error(err);
-    ongoingList.innerHTML = "<p class='text-center w-full'>Terjadi kesalahan saat mencari.</p>";
-  }
+  } catch (err) {
+    console.error(err);
+    ongoingList.innerHTML = "<p class='text-center w-full'>Kesalahan saat mencari.</p>";
+  }
 });
 
-// ✅ LOAD AWAL
+/* =============================
+   LOAD AWAL
+============================= */
 getOngoing();
 getComplete();
-
-
-
