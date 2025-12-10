@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Tonton Anime</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="../src/output.css" rel="stylesheet">
+</head>
+
+<body class="bg-slate-950 text-white min-h-screen">
+
+  <div class="max-w-4xl mx-auto p-6">
+
+    <!-- Judul Episode -->
+    <h1 id="episodeTitle" class="text-3xl font-bold mb-3">Memuat...</h1>
+    <p id="episodeDate" class="text-gray-400 mb-6"></p>
+
+    <!-- VIDEO (Hidden sampai server dipilih) -->
+    <div id="videoContainer" class="hidden w-full aspect-video bg-black rounded-xl overflow-hidden mb-8">
+      <iframe id="videoFrame" class="w-full h-full" allowfullscreen></iframe>
+    </div>
+
+    <!-- SERVER LIST -->
+    <h2 class="text-2xl font-bold mb-3">Pilih Server Streaming</h2>
+    <div id="serverList" class="flex flex-wrap gap-3"></div>
+
+  </div>
+
+  <script src="watch.js"></script>
+</body>
+</html>

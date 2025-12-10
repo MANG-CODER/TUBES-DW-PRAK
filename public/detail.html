@@ -4,129 +4,68 @@
   <meta charset="UTF-8">
   <title>Detail Anime</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- ✅ TAILWIND VIA PACKAGE -->
   <link href="../src/output.css" rel="stylesheet">
-
-  <!-- ✅ FAVICON -->
-  <link rel="icon" type="image/png" href="./img/Icon MangNime.png">
 </head>
+
 <body class="bg-slate-950 text-white min-h-screen">
 
-<!-- ✅ NAVBAR (TIDAK DIUBAH) -->
-<nav class="bg-slate-900 px-8 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+<!-- NAVBAR -->
+<nav class="bg-slate-900 px-8 py-4 flex justify-between items-center shadow-lg">
   <a href="index.html">
-    <img style="height: 3rem; width: auto;" src="./img/Logo MangNime.png" alt="MangNime">
+    <img style="height: 3rem;" src="./img/Logo MangNime.png" alt="MangNime">
   </a>
-
-  <div class="flex gap-6 text-sm font-semibold">
-    <a href="index.html" class="hover:text-purple-400">Home</a>
-    <a href="ongoing.html" class="hover:text-purple-400">Ongoing</a>
-    <a href="complete.html" class="hover:text-purple-400">Complete</a>
-    <a href="movie.html" class="hover:text-purple-400">Movie</a>
-    <a href="genre.html" class="hover:text-purple-400">Genre</a>
-    <a href="schedule.html" class="hover:text-purple-400">Schedule</a>
-  </div>
-
-  <input id="searchInput" type="text" placeholder="Cari anime..."
-    class="px-4 py-2 rounded-lg bg-slate-800 outline-none text-sm w-64">
+  <h1 class="text-xl font-semibold">Detail Anime</h1>
 </nav>
 
-<!-- ✅ WRAPPER -->
-<main class="w-full flex justify-center px-6 md:px-14"> 
-  <div class="w-full max-w-6xl px-6 pt-24 pb-20 space-y-14">
+<!-- MAIN CONTENT -->
+<main class="w-full flex justify-center px-6 md:px-14">
+  <div class="w-full max-w-5xl py-10 space-y-10">
 
-    <!-- ✅ HEADER DETAIL -->
-    <section class="flex flex-col md:flex-row items-start gap-10 w-full">
+    <!-- HEADER -->
+    <div class="flex flex-col md:flex-row gap-6">
+      <img id="animePoster"
+           class="w-56 h-80 object-cover rounded-xl shadow-xl bg-slate-800" />
 
-      <!-- ✅ COVER -->
-      <div class="flex-shrink-0 pt-10">
-        <div class="w-[260px] h-[380px] min-w-[260px] min-h-[380px] 
-                    rounded-2xl shadow-2xl border border-white/10 
-                    overflow-hidden bg-slate-800 flex items-center justify-center">
+      <div class="space-y-3">
+        <h2 id="animeTitle" class="text-3xl font-bold"></h2>
 
-          <img
-            id="animePoster"
-            alt="Cover Anime"
-            class="w-full h-full object-cover"
-          />
+        <p>Status: <span id="animeStatus" class="text-purple-400"></span></p>
+        <p>Studio: <span id="animeStudios" class="text-purple-400"></span></p>
+        <p>Aired: <span id="animeAired" class="text-purple-400"></span></p>
+        <p>Episodes: <span id="animeEpisodes" class="text-purple-400"></span></p>
+        <p>Duration: <span id="animeDuration" class="text-purple-400"></span></p>
+        <p>Score: <span id="animeScore" class="text-purple-400"></span></p>
 
-        </div>
-      </div>
+        <div class="flex flex-wrap gap-2" id="genreList"></div>
 
-      <!-- ✅ INFO KANAN -->
-      <div class="flex-1 space-y-4 px-4 md:px-8 pt-10">
-
-        <h1 id="animeTitle" class="text-3xl md:text-4xl font-medium leading-tight"></h1>
-
-        <!-- ✅ GENRE -->
-        <div id="genreList" class="flex flex-wrap gap-2"></div>
-
-        <!-- ✅ META INFO -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm text-gray-300 pt-2">
-          <div><p class="text-gray-400">Status</p><b id="animeStatus"></b></div>
-          <div><p class="text-gray-400">Studio</p><b id="animeStudios"></b></div>
-          <div><p class="text-gray-400">Rilis</p><b id="animeAired"></b></div>
-          <div><p class="text-gray-400">Episode</p><b id="animeEpisodes"></b></div>
-          <div><p class="text-gray-400">Durasi</p><b id="animeDuration"></b></div>
-          <div><p class="text-gray-400">Rating</p><b id="animeScore"></b></div>
-        </div>
-
-        <!-- ✅ BUTTON TONTON (AUTO EPISODE TERBARU) -->
-        <a
-          id="detailWatch"
-          target="_blank"
-          class="inline-flex items-center gap-2 mt-6 px-10 py-3
-                 rounded-full
-                 bg-gradient-to-r from-purple-600 to-indigo-600
-                 hover:from-purple-500 hover:to-indigo-500
-                 text-sm font-semibold
-                 shadow-lg hover:shadow-purple-500/30
-                 transition-all duration-300"
-        >
-          ▶ Tonton Sekarang
+        <a id="detailWatch"
+           class="inline-block bg-purple-600 px-6 py-3 rounded-lg hover:bg-purple-700 transition cursor-pointer">
+          Tonton Sekarang
         </a>
-
       </div>
-    </section>
+    </div>
 
-    <!-- ✅ EPISODE LIST -->
-    <section class="px-4 md:px-12">
-      <h2 class="text-2xl font-semibold mb-5">Daftar Episode</h2>
+    <!-- EPISODES -->
+    <div>
+      <h3 class="text-xl font-semibold mb-4">Episode</h3>
+      <div id="episodeList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
+    </div>
 
-      <div
-        id="episodeList"
-        class="grid 
-               grid-cols-2 
-               sm:grid-cols-3 
-               md:grid-cols-4 
-               lg:grid-cols-5
-               gap-x-6 
-               gap-y-6
-               w-full"
-      >
-      </div>
-    </section>
-
-    <!-- ✅ BATCH DOWNLOAD -->
-    <section class="px-4 md:px-12">
-      <h2 class="text-2xl font-semibold mb-5">Download Batch</h2>
+    <!-- BATCH DOWNLOAD -->
+    <div>
+      <h3 class="text-xl font-semibold mb-4">Download Batch</h3>
       <div id="batchBox"></div>
-    </section>
+    </div>
 
-    <!-- ✅ REKOMENDASI -->
-    <section class="px-4 md:px-12">
-      <h2 class="text-2xl font-semibold mb-5">Rekomendasi Anime</h2>
-      <div id="recommendedList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6"></div>
-    </section>
-
-    <div id="animeDetail"></div>
+    <!-- RECOMMENDATIONS -->
+    <div>
+      <h3 class="text-xl font-semibold mb-4">Rekomendasi Lain</h3>
+      <div id="recommendedList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
+    </div>
 
   </div>
 </main>
 
-<!-- ✅ JS -->
 <script src="detail.js"></script>
-
 </body>
 </html>
