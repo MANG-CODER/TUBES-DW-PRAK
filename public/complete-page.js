@@ -1,38 +1,150 @@
-const ongoingList = document.getElementById("ongoingList"); // Bisa jadi null di page ini
+// ==========================
+// 1. SETUP VARIABEL
+// ==========================
 const completeList = document.getElementById("completeList");
-const ongoingPagination = document.getElementById("ongoingPagination"); // Bisa jadi null
 const completePagination = document.getElementById("completePagination");
-const searchInput = document.getElementById("searchInput");
 const pageTitle = document.getElementById("pageTitle");
 
-const ONGOING_API = "https://www.sankavollerei.com/anime/ongoing-anime/";
+// Search Elements (Desktop & Mobile)
+const searchInput = document.getElementById("searchInput");
+const mobileSearchForm = document.getElementById("mobileSearchForm");
+const mobileSearchInput = document.getElementById("mobileSearchInput");
+
+// Navbar Elements
+const mobileBtn = document.getElementById("mobile-menu-btn");
+const mobileMenu = document.getElementById("mobile-menu");
+
+// API URL
 const COMPLETE_API = "https://www.sankavollerei.com/anime/complete-anime";
 const SEARCH_API = "https://www.sankavollerei.com/anime/search/";
 
-let ongoingPage = 1;
 let completePage = 1;
 
-// ==========================================
-// ✅ 1. RENDER CARD (Mode Complete)
-// ==========================================
+// ==========================
+// 2. NAVIGASI (MENU SANDWICH)
+// ==========================
+if (mobileBtn && mobileMenu) {
+  mobileBtn.addEventListener("click", () => {
+    mobileMenu.classList.toggle("hidden");
+  });
+}
+
+// ==========================
+// 3. LOGIKA PENCARIAN (LIVE SEARCH)
+// ==========================
+
+// Fungsi pencarian utama (bisa dipanggil desktop & mobile)
+async function handleLiveSearch(query) {
+    const cleanQuery = query.trim();
+
+    // A. KEMBALI KE DEFAULT (Jika input dihapus / < 3 huruf)
+    if (cleanQuery.length < 3) {
+        if (pageTitle) pageTitle.innerText = "✅ Semua Completed Anime";
+        if (pageTitle) pageTitle.hidden = false;
+        if (completePagination) completePagination.style.display = "flex"; 
+        getComplete(1); // Load ulang halaman 1 complete
+        return;
+    }
+
+    // B. MODE SEARCH
+    if (pageTitle) pageTitle.innerHTML = `<span class="text-purple-400">🔍 Hasil:</span> "${cleanQuery}"`;
+    // Sembunyikan pagination saat search
+    if (completePagination) completePagination.style.display = "none"; 
+
+    // Cek Cache
+    const cacheKey = `search-${cleanQuery}`;
+    const cachedData = getCache(cacheKey, 1000 * 60 * 5);
+    if (cachedData) {
+        const list = extractAnimeList(cachedData);
+        displaySearchResults(list);
+        return;
+    }
+
+    // Fetch API
+    if (completeList) completeList.innerHTML = `<div class="col-span-full text-center text-white animate-pulse">Mencari...</div>`;
+
+    try {
+        const res = await fetch(`${SEARCH_API}${cleanQuery}`);
+        const json = await res.json();
+        
+        setCache(cacheKey, json);
+        const list = extractAnimeList(json);
+        displaySearchResults(list);
+
+    } catch (err) {
+        console.error(err);
+        if (completeList) completeList.innerHTML = `<div class="col-span-full text-center text-red-400">Error search.</div>`;
+    }
+}
+
+function displaySearchResults(list) {
+    if (completeList) completeList.innerHTML = "";
+    
+    if (list && list.length > 0) {
+        // Gunakan type="search" agar badge menyesuaikan konten (Score/Episode)
+        list.forEach(anime => renderCard(completeList, anime, "search"));
+    } else {
+        completeList.innerHTML = `<div class="col-span-full text-center text-slate-400">Tidak ditemukan.</div>`;
+    }
+}
+
+// --- Event Listener Desktop ---
+if (searchInput) {
+    searchInput.addEventListener("keyup", function() {
+        handleLiveSearch(this.value);
+    });
+}
+
+// --- Event Listener Mobile ---
+if (mobileSearchForm && mobileSearchInput) {
+    mobileSearchForm.addEventListener("submit", (e) => {
+        e.preventDefault(); // Mencegah reload halaman
+        mobileSearchInput.blur(); // Tutup keyboard
+        handleLiveSearch(mobileSearchInput.value);
+    });
+}
+
+// ==========================
+// 4. HELPER & RENDER (SMART BADGE)
+// ==========================
+
+function extractAnimeList(json) {
+    if (!json) return [];
+    if (json.data && Array.isArray(json.data.animeList)) return json.data.animeList;
+    if (Array.isArray(json.animeList)) return json.animeList;
+    if (json.data && Array.isArray(json.data)) return json.data;
+    if (Array.isArray(json)) return json;
+    return [];
+}
+
 function renderCard(container, anime, type = "complete") {
-  // Ambil ID dari animeId
   const slug = anime.animeId || anime.href?.split("/").pop() || "#";
-  const poster =
-    anime.poster || "https://via.placeholder.com/300x400?text=No+Image";
+  const poster = anime.poster || "https://via.placeholder.com/300x400?text=No+Image";
   const title = anime.title || "No Title";
 
-  // Tampilkan Score jika Complete, Tampilkan Episode jika Ongoing/Search
-  const label =
-    type === "complete"
-      ? `<div class="absolute top-2 left-2 bg-green-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md">⭐ ${
-          anime.score || "-"
-        }</div>`
-      : `<div class="absolute top-2 left-2 bg-purple-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md">Ep ${
-          anime.episodes || "?"
-        }</div>`;
+  // --- LOGIKA BADGE CERDAS ---
+  let label = "";
+  const episodeCount = anime.episodes || anime.episode; 
+  const scoreCount = anime.score;
+  const isComplete = type === "complete" || anime.status === "Completed";
 
-  // Tanggal rilis (Complete biasanya pakai lastReleaseDate)
+  if (isComplete) {
+      // Prioritas Score untuk Anime Complete
+      label = `<div class="absolute top-2 left-2 bg-green-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md">⭐ ${scoreCount || "-"}</div>`;
+  } 
+  else if (episodeCount) {
+      // Jika hasil search ternyata ongoing, tampilkan Episode
+      label = `<div class="absolute top-2 left-2 bg-purple-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md">Ep ${episodeCount}</div>`;
+  } 
+  else if (scoreCount) {
+      // Fallback ke Score
+      label = `<div class="absolute top-2 left-2 bg-green-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md">⭐ ${scoreCount}</div>`;
+  } 
+  else {
+      label = `<div class="absolute top-2 left-2 bg-gray-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md">Anime</div>`;
+  }
+
+  // Tanggal Info
   const dateInfo = anime.lastReleaseDate
     ? `Selesai: ${anime.lastReleaseDate}`
     : anime.releaseDay || "";
@@ -55,9 +167,6 @@ function renderCard(container, anime, type = "complete") {
   `;
 }
 
-// ==========================================
-// ✅ 2. PAGINATION
-// ==========================================
 function renderPagination(container, currentPage, callbackName) {
   if (!container) return;
   container.innerHTML = `
@@ -66,9 +175,7 @@ function renderPagination(container, currentPage, callbackName) {
       ${currentPage === 1 ? "disabled" : ""}>
       Prev
     </button>
-
     <span class="px-4 py-2 bg-purple-600 text-white font-bold rounded">${currentPage}</span>
-
     <button onclick="${callbackName}(${currentPage + 1})"
       class="px-4 py-2 bg-slate-800 text-white rounded hover:bg-slate-700 transition">
       Next
@@ -76,16 +183,14 @@ function renderPagination(container, currentPage, callbackName) {
   `;
 }
 
-// ==========================================
-// ✅ 3. HELPER (CACHE & SAFETY EXTRACTOR)
-// ==========================================
+// ==========================
+// 5. CACHE SYSTEM
+// ==========================
 function setCache(key, data) {
   try {
     const cache = { timestamp: Date.now(), data };
     localStorage.setItem(key, JSON.stringify(cache));
-  } catch (e) {
-    console.warn("Cache Full");
-  }
+  } catch (e) { console.warn("Cache Full"); }
 }
 
 function getCache(key, maxAge = 1000 * 60 * 25) {
@@ -95,36 +200,19 @@ function getCache(key, maxAge = 1000 * 60 * 25) {
     const parsed = JSON.parse(cached);
     if (Date.now() - parsed.timestamp > maxAge) return null;
     return parsed.data;
-  } catch (e) {
-    return null;
-  }
+  } catch (e) { return null; }
 }
 
-// FUNGSI PENTING: Mencegah error "undefined reading animeList"
-function extractAnimeList(json) {
-  if (!json) return [];
-  if (json.data && Array.isArray(json.data.animeList))
-    return json.data.animeList; // Sesuai JSON baru
-  if (Array.isArray(json.animeList)) return json.animeList;
-  if (Array.isArray(json.data)) return json.data;
-  if (Array.isArray(json)) return json;
-  return [];
-}
-
-// ==========================================
-// ✅ 4. FETCH COMPLETE
-// ==========================================
+// ==========================
+// 6. FETCH COMPLETE (DEFAULT LOAD)
+// ==========================
 async function getComplete(page = 1) {
   completePage = page;
-
-  // Reset UI Loading
-  if (completeList)
-    completeList.innerHTML = `<div class="col-span-full text-center py-10 text-white animate-pulse">Loading Complete Anime...</div>`;
+  if (completeList) completeList.innerHTML = `<div class="col-span-full text-center py-10 text-white animate-pulse">Loading Complete Anime...</div>`;
 
   const cacheKey = `complete-page-${page}`;
   const cachedData = getCache(cacheKey);
 
-  // --- CEK CACHE ---
   if (cachedData) {
     const list = extractAnimeList(cachedData);
     if (completeList) completeList.innerHTML = "";
@@ -133,112 +221,26 @@ async function getComplete(page = 1) {
     return;
   }
 
-  // --- FETCH API ---
   try {
     const res = await fetch(`${COMPLETE_API}?page=${page}`);
-    if (!res.ok) throw new Error("API Error");
-
     const json = await res.json();
-    console.log("DEBUG COMPLETE:", json); // Cek console untuk memastikan data masuk
-
     const list = extractAnimeList(json);
 
     if (list.length > 0) {
       setCache(cacheKey, json);
-
       if (completeList) completeList.innerHTML = "";
       list.forEach((anime) => renderCard(completeList, anime, "complete"));
       renderPagination(completePagination, completePage, "getComplete");
     } else {
-      if (completeList)
-        completeList.innerHTML = `<div class="col-span-full text-center text-red-400">Data Kosong</div>`;
+      if (completeList) completeList.innerHTML = `<div class="col-span-full text-center text-red-400">Data Kosong</div>`;
     }
   } catch (err) {
     console.error(err);
-    if (completeList)
-      completeList.innerHTML = `<div class="col-span-full text-center text-red-500">Gagal memuat API</div>`;
+    if (completeList) completeList.innerHTML = `<div class="col-span-full text-center text-red-500">Gagal memuat API</div>`;
   }
 }
 
-// ==========================================
-// ✅ 5. SEARCH FUNCTION (Fitur Pencarian)
-// ==========================================
-if (searchInput) {
-  searchInput.addEventListener("keyup", async function () {
-    const q = this.value.trim();
-
-    // 1. Jika input < 3 huruf, kembalikan ke tampilan awal
-    if (q.length < 3) {
-      if (pageTitle) pageTitle.hidden = false;
-      getComplete(1); // Load ulang halaman 1
-      return;
-    }
-
-    // 2. Sembunyikan judul halaman saat mencari
-    if (pageTitle) pageTitle.hidden = true;
-
-    const cacheKey = `search-${q}`;
-    const cachedData = getCache(cacheKey, 1000 * 60 * 5);
-
-    // Cek Cache Search
-    if (cachedData) {
-      const list = extractAnimeList(cachedData);
-      displaySearchResults(list);
-      return;
-    }
-
-    // Fetch Search API
-    try {
-      if (completeList)
-        completeList.innerHTML = `<div class="col-span-full text-center text-white">Searching...</div>`;
-      if (completePagination) completePagination.innerHTML = "";
-
-      const res = await fetch(`${SEARCH_API}${q}`);
-      const json = await res.json();
-
-      setCache(cacheKey, json);
-      const list = extractAnimeList(json);
-
-      displaySearchResults(list);
-    } catch (err) {
-      console.error(err);
-      if (completeList)
-        completeList.innerHTML =
-          "<p class='col-span-full text-center text-red-400'>Terjadi kesalahan saat mencari.</p>";
-    }
-  });
-}
-
-function displaySearchResults(list) {
-  if (completeList) completeList.innerHTML = "";
-  if (completePagination) completePagination.innerHTML = "";
-
-  if (list && list.length > 0) {
-    // Tipe 'search' akan menampilkan badge episode jika tersedia
-    list.forEach((anime) => renderCard(completeList, anime, "complete"));
-  } else {
-    if (completeList)
-      completeList.innerHTML =
-        "<p class='col-span-full text-center text-white'>Tidak ditemukan anime dengan kata kunci tersebut.</p>";
-  }
-}
-
-// ==========================================
-// ✅ 6. LOAD AWAL
-// ==========================================
+// Load Awal
 document.addEventListener("DOMContentLoaded", () => {
   getComplete();
-});
-
-// ==========================
-// 7. Menu
-// ==========================
-// Ambil elemen button dan menu
-const mobileBtn = document.getElementById('mobile-menu-btn');
-const mobileMenu = document.getElementById('mobile-menu');
-
-// Tambahkan event listener untuk klik
-mobileBtn.addEventListener('click', () => {
-    // Toggle class 'hidden' pada menu mobile
-    mobileMenu.classList.toggle('hidden');
 });

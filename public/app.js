@@ -1,164 +1,195 @@
 // ==========================
-// 1. SETUP VARIABEL & API
+// 1. SETUP VARIABEL (ELEMENT HTML)
 // ==========================
 const ongoingList = document.getElementById("ongoingList");
 const completeList = document.getElementById("completeList");
 const searchInput = document.getElementById("searchInput");
 const pageTitle = document.getElementById("pageTitle");
 
+// Element Mobile
+const mobileSearchForm = document.getElementById("mobileSearchForm");
+const mobileSearchInput = document.getElementById("mobileSearchInput");
+const mobileBtn = document.getElementById("mobile-menu-btn");
+const mobileMenu = document.getElementById("mobile-menu");
+
+// API URL
 const ONGOING_API = "https://www.sankavollerei.com/anime/ongoing-anime/";
 const COMPLETE_API = "https://www.sankavollerei.com/anime/complete-anime";
 const SEARCH_API = "https://www.sankavollerei.com/anime/search/";
 
 // ==========================
-// 2. FUNGSI PENCARIAN (GLOBAL)
+// 2. NAVIGASI (MENU SANDWICH)
 // ==========================
-
-// Fungsi Redirect (Pindah Halaman)
-function executeSearch(query) {
-  const cleanQuery = query.trim();
-  if (cleanQuery.length > 0) {
-    // Kita tetap arahkan ke ongoing.html, tapi nanti kita tangkap datanya
-    window.location.href = `ongoing.html?q=${encodeURIComponent(cleanQuery)}`;
-  }
-}
-
-// Logic untuk Mobile (Dipanggil dari onsubmit HTML)
-window.cariAnimeMobile = function (event) {
-  event.preventDefault();
-  const mobileInput = document.getElementById("mobileSearchInput");
-  if (mobileInput) {
-    mobileInput.blur();
-    executeSearch(mobileInput.value);
-  }
-};
-
-// Logic untuk Desktop
-if (searchInput) {
-  searchInput.addEventListener("keyup", (e) => {
-    if (e.key === "Enter") {
-      executeSearch(searchInput.value);
-    }
+if (mobileBtn && mobileMenu) {
+  mobileBtn.addEventListener("click", () => {
+    mobileMenu.classList.toggle("hidden");
   });
 }
 
 // ==========================
-// 3. HELPER RENDERING
+// 3. LOGIKA PENCARIAN (LIVE SEARCH)
 // ==========================
-function renderCard(container, anime, type) {
-  // Fallback logic yang aman
-  const slug = anime.animeId || anime.href?.split("/").pop() || "#";
-  const poster = anime.poster || "https://via.placeholder.com/300x400";
-  const title = anime.title || "No Title";
+async function handleLiveSearch(query) {
+  const cleanQuery = query.trim();
 
-  // Badge logic
-  let badge = "";
-  if (type === "search") {
-    badge = `<div class="absolute top-2 left-2 bg-blue-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md">Hasil</div>`;
-  } else if (type === "ongoing") {
-    badge = `<div class="absolute top-2 left-2 bg-purple-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md">Ep ${
-      anime.episodes || "?"
-    }</div>`;
-  } else {
-    badge = `<div class="absolute top-2 left-2 bg-green-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md">⭐ ${
-      anime.score || "-"
-    }</div>`;
+  // A. KEMBALI KE DEFAULT (Jika ketikan < 3 huruf)
+  if (cleanQuery.length < 3) {
+    if (pageTitle)
+      pageTitle.innerHTML = `<span class="w-2 h-8 bg-purple-600 rounded-full"></span> 🔥 Ongoing Anime`;
+
+    // Tampilkan kembali section Complete
+    if (completeList && completeList.parentElement) {
+      completeList.parentElement.style.display = "block";
+    }
+
+    getHomeData();
+    return;
   }
 
-  container.innerHTML += `
-        <a href="detail.html?slug=${slug}" class="block group relative">
-            <div class="relative bg-slate-800 rounded-xl overflow-hidden hover:scale-105 transition-transform duration-300 shadow-lg border border-slate-700 aspect-[2/3]">
-                ${badge}
-                <img src="${poster}" alt="${title}" class="w-full h-full object-cover">
-                <div class="absolute bottom-0 w-full bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent p-3 pt-8">
-                    <h3 class="text-xs font-bold text-white line-clamp-2 group-hover:text-purple-400 transition-colors">${title}</h3>
-                    <p class="text-[10px] text-gray-400 mt-1">${
-                      anime.releaseDay || anime.lastReleaseDate || ""
-                    }</p>
-                </div>
-            </div>
-        </a>`;
+  // B. MODE PENCARIAN
+  if (pageTitle)
+    pageTitle.innerHTML = `<span class="text-purple-400">🔍 Hasil Pencarian:</span> "${cleanQuery}"`;
+
+  // Sembunyikan section Complete
+  if (completeList && completeList.parentElement) {
+    completeList.parentElement.style.display = "none";
+  }
+
+  // Tampilkan Loading
+  if (ongoingList)
+    ongoingList.innerHTML = `<div class="col-span-full text-center text-white animate-pulse">Mencari "${cleanQuery}"...</div>`;
+
+  try {
+    const res = await fetch(`${SEARCH_API}${cleanQuery}`);
+    const json = await res.json();
+    const list = extractAnimeList(json);
+
+    if (ongoingList) ongoingList.innerHTML = "";
+
+    if (list.length > 0) {
+      // Saat search, kita anggap type bukan 'complete' agar muncul Episode
+      list.forEach((anime) => renderCard(ongoingList, anime, "search"));
+    } else {
+      ongoingList.innerHTML = `<p class="col-span-full text-center text-slate-400">Tidak ditemukan anime dengan kata kunci tersebut.</p>`;
+    }
+  } catch (err) {
+    console.error(err);
+    if (ongoingList)
+      ongoingList.innerHTML = `<p class="col-span-full text-center text-red-400">Error saat mencari.</p>`;
+  }
 }
 
+// --- Event Listener Desktop ---
+if (searchInput) {
+  searchInput.addEventListener("keyup", function () {
+    handleLiveSearch(this.value);
+  });
+}
+
+// --- Event Listener Mobile ---
+if (mobileSearchForm && mobileSearchInput) {
+  mobileSearchForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    mobileSearchInput.blur();
+    handleLiveSearch(mobileSearchInput.value);
+  });
+}
+
+// ==========================
+// 4. HELPER & RENDER (UPDATED)
+// ==========================
 function extractAnimeList(json) {
   if (!json) return [];
   if (json.data && Array.isArray(json.data.animeList))
     return json.data.animeList;
   if (Array.isArray(json.animeList)) return json.animeList;
-  if (json.data && Array.isArray(json.data)) return json.data; // Fallback umum
+  if (json.data && Array.isArray(json.data)) return json.data;
   return [];
 }
 
-// ==========================
-// 4. LOGIKA UTAMA (LOAD DATA)
-// ==========================
-async function loadPageContent() {
-  // 1. Cek apakah ada parameter "?q=" di URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const searchQuery = urlParams.get("q");
+// ✅ FUNGSI RENDER CARD (SESUAI REQUEST BARU)
+// ==========================================
+// ✅ FUNGSI RENDER CARD (PERBAIKAN LOGIKA BADGE)
+// ==========================================
+function renderCard(container, anime, type = "ongoing") {
+  const slug = anime.animeId || anime.href?.split("/").pop() || "#";
+  const poster = anime.poster || "https://via.placeholder.com/300x400?text=No+Image";
+  const title = anime.title || "No Title";
 
-  // JIKA ADA PENCARIAN (MODE SEARCH)
-  if (searchQuery && ongoingList) {
-    console.log("Mode Pencarian Aktif:", searchQuery);
+  // --- LOGIKA BADGE CERDAS ---
+  let label = "";
+  
+  // 1. Ambil data yang tersedia (Cek variasi nama field API)
+  const episodeCount = anime.episodes || anime.episode; 
+  const scoreCount = anime.score;
+  const isComplete = type === "complete" || anime.status === "Completed";
 
-    // Ubah Judul Halaman
-    if (pageTitle)
-      pageTitle.innerHTML = `<span class="text-purple-400">🔍 Hasil Pencarian:</span> "${searchQuery}"`;
-
-    // Sembunyikan Section Complete (agar fokus ke hasil search)
-    if (completeList) {
-      completeList.parentElement.style.display = "none"; // Sembunyikan section complete
-    }
-
-    ongoingList.innerHTML = `<div class="col-span-full text-center py-10 text-white animate-pulse">Sedang mencari "${searchQuery}"...</div>`;
-
-    try {
-      // Fetch ke API Search
-      const res = await fetch(`${SEARCH_API}?q=${searchQuery}`);
-      const json = await res.json();
-      const results = extractAnimeList(json);
-
-      ongoingList.innerHTML = ""; // Bersihkan loading
-
-      if (results.length > 0) {
-        results.forEach((a) => renderCard(ongoingList, a, "search"));
-      } else {
-        ongoingList.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400">
-                    <p class="text-xl mb-2">😔</p>
-                    Tidak ditemukan anime dengan kata kunci "${searchQuery}"
-                </div>`;
-      }
-    } catch (e) {
-      console.error(e);
-      ongoingList.innerHTML = `<p class="col-span-full text-center text-red-400">Terjadi kesalahan saat mencari.</p>`;
-    }
-
-    return; // BERHENTI DI SINI (Jangan load data Ongoing biasa)
+  // 2. Tentukan apa yang mau ditampilkan
+  if (isComplete) {
+      // Jika halaman Complete, Prioritaskan Score
+      label = `<div class="absolute top-2 left-2 bg-green-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md">⭐ ${scoreCount || "-"}</div>`;
+  } 
+  else if (episodeCount) {
+      // Jika ada data Episode, Tampilkan Episode
+      label = `<div class="absolute top-2 left-2 bg-purple-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md">Ep ${episodeCount}</div>`;
+  } 
+  else if (scoreCount) {
+      // Jika tidak ada episode (misal hasil search anime lama), Tampilkan Score sebagai fallback
+      label = `<div class="absolute top-2 left-2 bg-green-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md">⭐ ${scoreCount}</div>`;
+  } 
+  else {
+      // Jika data benar-benar kosong
+      label = `<div class="absolute top-2 left-2 bg-gray-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md">Anime</div>`;
   }
 
-  // JIKA TIDAK ADA PENCARIAN (MODE NORMAL)
-  // Load Ongoing & Complete seperti biasa
-  if (ongoingList)
-    ongoingList.innerHTML = `<div class="col-span-full text-center py-10 text-white animate-pulse">Loading...</div>`;
-  if (completeList)
-    completeList.innerHTML = `<div class="col-span-full text-center py-10 text-white animate-pulse">Loading...</div>`;
+  // --- LOGIKA TANGGAL ---
+  const dateInfo = anime.lastReleaseDate
+    ? `Selesai: ${anime.lastReleaseDate}`
+    : anime.releaseDay || "";
+
+  container.innerHTML += `
+    <a href="detail.html?slug=${slug}" class="block group">
+      <div class="relative bg-slate-900 rounded-xl overflow-hidden hover:scale-105 transition-transform duration-300 shadow-lg border border-slate-800">
+        ${label}
+        <img src="${poster}" alt="${title}" class="w-full h-64 object-cover">
+        <div class="absolute bottom-0 w-full bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent p-3 pt-8">
+          <h3 class="text-sm font-bold text-white line-clamp-2 group-hover:text-purple-400 transition-colors">
+            ${title}
+          </h3>
+          <p class="text-[10px] text-gray-400 mt-1">
+             ${dateInfo}
+          </p>
+        </div>
+      </div>
+    </a>
+  `;
+}
+
+// ==========================
+// 5. LOAD DATA HOME DEFAULT
+// ==========================
+async function getHomeData() {
+  if (ongoingList.children.length > 1 && completeList.children.length > 1)
+    return;
 
   try {
+    if (ongoingList)
+      ongoingList.innerHTML = `<div class="col-span-full text-center text-white animate-pulse">Loading...</div>`;
+
     // Fetch Ongoing
     const res1 = await fetch(`${ONGOING_API}?page=1`);
     const data1 = await res1.json();
     const list1 = extractAnimeList(data1);
-    if (ongoingList) {
-      ongoingList.innerHTML = "";
-      list1.slice(0, 12).forEach((a) => renderCard(ongoingList, a, "ongoing"));
-    }
+
+    if (ongoingList) ongoingList.innerHTML = "";
+    list1.slice(0, 12).forEach((a) => renderCard(ongoingList, a, "ongoing"));
 
     // Fetch Complete
-    const res2 = await fetch(`${COMPLETE_API}?page=1`);
-    const data2 = await res2.json();
-    const list2 = extractAnimeList(data2);
     if (completeList) {
       completeList.innerHTML = "";
+      const res2 = await fetch(`${COMPLETE_API}?page=1`);
+      const data2 = await res2.json();
+      const list2 = extractAnimeList(data2);
       list2
         .slice(0, 12)
         .forEach((a) => renderCard(completeList, a, "complete"));
@@ -168,15 +199,4 @@ async function loadPageContent() {
   }
 }
 
-// Jalankan Fungsi Utama
-loadPageContent();
-
-// ==========================
-// 5. MENU SANDWICH
-// ==========================
-const mobileBtn = document.getElementById("mobile-menu-btn");
-const mobileMenu = document.getElementById("mobile-menu");
-if (mobileBtn && mobileMenu) {
-  mobileBtn.addEventListener("click", () => {
-    mobileMenu.classLi~
-}
+getHomeData();

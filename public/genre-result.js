@@ -62,7 +62,6 @@ async function loadGenreAnime(page = 1) {
 
     // Validasi Data
     if (json.status === "success" && json.data) {
-      // Gabungkan list & pagination untuk disimpan di cache
       const dataToCache = {
         animeList: json.data.animeList,
         pagination: json.pagination,
@@ -92,29 +91,29 @@ function renderAnimeList(list) {
   }
 
   list.forEach((anime) => {
-    // Ambil ID Anime dengan aman
-    const slug = anime.animeId || anime.href.split("/").pop();
+    const slug = anime.animeId || anime.href?.split("/").pop() || "#";
     const poster = anime.poster || "https://via.placeholder.com/300x450";
-    const info = anime.score ? `⭐ ${anime.score}` : anime.season || "Unknown";
+    // Badge info: Score atau Season
+    const info = anime.score ? `⭐ ${anime.score}` : anime.season || "Anime";
 
     animeList.innerHTML += `
-            <a href="detail.html?slug=${slug}" class="block group relative">
-                <div class="relative bg-slate-800 rounded-xl overflow-hidden hover:scale-105 transition-transform duration-300 shadow-lg border border-slate-700 aspect-[2/3]">
-                    
-                    <div class="absolute top-2 left-2 bg-slate-900/80 backdrop-blur px-2 py-1 text-[10px] font-bold text-white rounded border border-slate-700 shadow-sm z-10">
-                        ${info}
-                    </div>
-
-                    <img src="${poster}" class="w-full h-full object-cover group-hover:opacity-90 transition" alt="${anime.title}">
-                    
-                    <div class="absolute bottom-0 w-full bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent p-3 pt-10">
-                        <h3 class="text-xs font-bold text-white line-clamp-2 group-hover:text-purple-400 transition-colors">
-                            ${anime.title}
-                        </h3>
-                    </div>
+        <a href="detail.html?slug=${slug}" class="block group relative">
+            <div class="relative bg-slate-800 rounded-xl overflow-hidden hover:scale-105 transition-transform duration-300 shadow-lg border border-slate-700 aspect-[2/3]">
+                
+                <div class="absolute top-2 left-2 bg-slate-900 px-2 py-1 text-[10px] font-bold text-white rounded border border-slate-700 shadow-md z-10">
+                    ${info}
                 </div>
-            </a>
-        `;
+
+                <img src="${poster}" class="w-full h-full object-cover group-hover:opacity-90 transition" alt="${anime.title}">
+                
+                <div class="absolute bottom-0 w-full bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent p-3 pt-10">
+                    <h3 class="text-xs font-bold text-white line-clamp-2 group-hover:text-purple-400 transition-colors">
+                        ${anime.title}
+                    </h3>
+                </div>
+            </div>
+        </a>
+    `;
   });
 }
 
@@ -139,9 +138,9 @@ function renderPagination(pagination, currentPage) {
     paginationContainer.innerHTML += createPageBtn(1, "Prev", true);
   }
 
-  // Info Halaman (Contoh: Page 1 of 44)
+  // Info Halaman
   paginationContainer.innerHTML += `
-        <span class="px-4 py-2 mt-20 bg-slate-800 text-slate-400 text-sm font-semibold rounded-lg border border-slate-700">
+        <span class="px-4 py-2 mt-2 bg-slate-800 text-slate-400 text-sm font-semibold rounded-lg border border-slate-700">
             Page ${currentPage} / ${totalPages}
         </span>
     `;
@@ -160,17 +159,9 @@ function renderPagination(pagination, currentPage) {
 
 function createPageBtn(page, text, disabled) {
   if (disabled) {
-    return `
-            <button disabled class="px-4 py-2 bg-slate-800 text-slate-600 rounded-lg text-sm font-bold cursor-not-allowed border border-slate-800">
-                ${text}
-            </button>
-        `;
+    return `<button disabled class="px-4 py-2 bg-slate-800 text-slate-600 rounded-lg text-sm font-bold cursor-not-allowed border border-slate-800">${text}</button>`;
   }
-  return `
-        <a href="?id=${genreId}&page=${page}" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-bold transition shadow-lg shadow-purple-900/20">
-            ${text}
-        </a>
-    `;
+  return `<a href="?id=${genreId}&page=${page}" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-bold transition shadow-lg shadow-purple-900/20">${text}</a>`;
 }
 
 // ==========================================
@@ -183,16 +174,3 @@ function showError(msg) {
 
 // EXECUTE
 loadGenreAnime(currentPageParam);
-
-// ==========================
-// 6. Menu
-// ==========================
-// Ambil elemen button dan menu
-const mobileBtn = document.getElementById('mobile-menu-btn');
-const mobileMenu = document.getElementById('mobile-menu');
-
-// Tambahkan event listener untuk klik
-mobileBtn.addEventListener('click', () => {
-    // Toggle class 'hidden' pada menu mobile
-    mobileMenu.classList.toggle('hidden');
-});
