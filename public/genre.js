@@ -155,3 +155,16 @@ if (searchInput) {
 
 // EXECUTE
 loadGenres();
+
+// ==========================
+// 6. Menu
+// ==========================
+// Ambil elemen button dan menu
+const mobileBtn = document.getElementById('mobile-menu-btn');
+const mobileMenu = document.getElementById('mobile-menu');
+
+// Tambahkan event listener untuk klik
+mobileBtn.addEventListener('click', () => {
+    // Toggle class 'hidden' pada menu mobile
+    mobileMenu.classList.toggle('hidden');
+});

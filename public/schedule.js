@@ -128,13 +128,56 @@ function renderSchedule(data) {
 // ==========================
 // 5. SEARCH REDIRECT (Opsional)
 // ==========================
-if (searchInput) {
-  searchInput.addEventListener("keyup", async (e) => {
-    if (e.key === "Enter" || e.target.value.length > 3) {
-      window.location.href = `ongoing.html?q=${e.target.value}`;
-    }
-  });
+// --- BAGIAN SEARCH ---
+
+const desktopSearch = document.getElementById('searchInput');
+const mobileSearch = document.getElementById('mobileSearchInput');
+
+// Fungsi Pencarian Utama (Logika search kamu dipindah ke sini)
+function performSearch(query) {
+    const filter = query.toLowerCase();
+    
+    // Asumsi: Kamu mencari elemen kartu anime (sesuaikan selector ini dengan struktur HTML kartumu)
+    // Contoh: Mencari judul di dalam elemen h3 atau span
+    const animeCards = document.querySelectorAll('.anime-card'); // Ganti '.anime-card' dengan class pembungkus kartumu
+
+    animeCards.forEach(card => {
+        const title = card.innerText.toLowerCase(); // Mengambil semua teks dalam kartu
+        
+        if (title.includes(filter)) {
+            card.style.display = ""; // Tampilkan jika cocok
+        } else {
+            card.style.display = "none"; // Sembunyikan jika tidak cocok
+        }
+    });
+}
+
+// Event Listener untuk Desktop
+if (desktopSearch) {
+    desktopSearch.addEventListener('keyup', (e) => {
+        performSearch(e.target.value);
+    });
+}
+
+// Event Listener untuk Mobile
+if (mobileSearch) {
+    mobileSearch.addEventListener('keyup', (e) => {
+        performSearch(e.target.value);
+    });
 }
 
 // EXECUTE
 loadSchedule();
+
+// ==========================
+// 6. Menu
+// ==========================
+// Ambil elemen button dan menu
+const mobileBtn = document.getElementById('mobile-menu-btn');
+const mobileMenu = document.getElementById('mobile-menu');
+
+// Tambahkan event listener untuk klik
+mobileBtn.addEventListener('click', () => {
+    // Toggle class 'hidden' pada menu mobile
+    mobileMenu.classList.toggle('hidden');
+});
