@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MangNime - Streaming Anime Gratis</title>
+  <title>Daftar Genre - MangNime</title>
   <link href="../src/output.css" rel="stylesheet">
   <link rel="icon" type="image/png" href="./img/Icon MangNime.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -19,11 +19,11 @@
         </a>
 
         <div class="hidden md:flex space-x-8 text-sm font-medium">
-          <a href="index.html" class="text-purple-400 hover:text-purple-300 transition-colors">Home</a>
+          <a href="index.html" class="hover:text-purple-400 hover:text-purple-300 transition-colors">Home</a>
           <a href="ongoing.html" class="hover:text-purple-400 transition-colors">Ongoing</a>
           <a href="complete.html" class="hover:text-purple-400 transition-colors">Complete</a>
           <a href="schedule.html" class="hover:text-purple-400 transition-colors">Schedule</a>
-          <a href="genre.html" class="hover:text-purple-400 transition-colors">Genre</a>
+          <a href="genre.html" class="text-purple-400 transition-colors">Genre</a>
         </div>
 
         <div class="relative hidden md:block">
@@ -41,49 +41,32 @@
     </div>
   </nav>
 
-  <div class="relative bg-slate-900 border-b border-slate-800">
-      <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 text-center">
-          <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 mb-2">
-              Streaming Anime Favoritmu
-          </h1>
-          <p class="text-slate-400 text-sm sm:text-base">Nikmati ribuan anime subtitle Indonesia tanpa iklan yang mengganggu.</p>
+  <div class="relative bg-slate-900 border-b border-slate-800 py-12 text-center overflow-hidden">
+      <div class="absolute top-0 left-1/4 w-64 h-64 bg-purple-600/10 blur-3xl rounded-full pointer-events-none"></div>
+      <div class="absolute bottom-0 right-1/4 w-64 h-64 bg-blue-600/10 blur-3xl rounded-full pointer-events-none"></div>
+
+      <div class="relative z-10">
+          <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-3">🧩 Jelajahi Genre</h1>
+          <p class="text-slate-400 text-sm md:text-base max-w-xl mx-auto">Temukan anime favoritmu berdasarkan kategori yang kamu suka.</p>
       </div>
   </div>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
-    
-    <section>
-      <div class="flex items-center justify-between mb-6">
-          <h2 id="pageTitle" class="text-2xl font-bold flex items-center gap-2">
-              <span class="w-2 h-8 bg-purple-600 rounded-full"></span>
-              🔥 Ongoing Anime
-          </h2>
-          <a href="ongoing.html" class="text-sm text-purple-400 hover:text-purple-300 hover:underline">Lihat Semua &rarr;</a>
-      </div>
+  <main class="max-w-7xl mx-auto px-4 py-12 min-h-screen">
       
-      <div id="ongoingList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-          <div class="animate-pulse bg-slate-800 rounded-xl aspect-[2/3]"></div>
-          <div class="animate-pulse bg-slate-800 rounded-xl aspect-[2/3]"></div>
-          <div class="animate-pulse bg-slate-800 rounded-xl aspect-[2/3]"></div>
-          <div class="animate-pulse bg-slate-800 rounded-xl aspect-[2/3]"></div>
+      <div class="mb-8 max-w-md mx-auto">
+          <div class="relative">
+              <input id="genreFilter" type="text" placeholder="Filter genre..." class="w-full bg-slate-800 text-slate-200 border border-slate-700 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-purple-500 transition shadow-lg">
+          </div>
       </div>
 
-      <div id="ongoingPagination" class="flex justify-center gap-2 mt-10"></div>
-    </section>
-
-    <section>
-      <div class="flex items-center justify-between mb-6">
-          <h2 id="pageTitle1" class="text-2xl font-bold flex items-center gap-2">
-              <span class="w-2 h-8 bg-green-500 rounded-full"></span>
-              ✅ Complete Anime
-          </h2>
-          <a href="complete.html" class="text-sm text-green-400 hover:text-green-300 hover:underline">Lihat Semua &rarr;</a>
+      <div id="genreContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+          <div class="animate-pulse h-16 bg-slate-800 rounded-xl"></div>
+          <div class="animate-pulse h-16 bg-slate-800 rounded-xl"></div>
+          <div class="animate-pulse h-16 bg-slate-800 rounded-xl"></div>
+          <div class="animate-pulse h-16 bg-slate-800 rounded-xl"></div>
+          <div class="animate-pulse h-16 bg-slate-800 rounded-xl"></div>
+          <div class="animate-pulse h-16 bg-slate-800 rounded-xl"></div>
       </div>
-
-      <div id="completeList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6"></div>
-      
-      <div id="completePagination" class="flex justify-center gap-2 mt-10"></div>
-    </section>
 
   </main>
 
@@ -93,6 +76,6 @@
       </div>
   </footer>
 
-  <script src="app.js"></script>
+  <script src="genre.js"></script>
 </body>
 </html>
