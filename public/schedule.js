@@ -201,19 +201,22 @@ function renderSchedule(data) {
     const isToday = dayName === today;
     const sectionId = `day-${index}`;
 
-    // Render Tab
+    // 1. RENDER TAB BUTTONS (Diperbaiki)
+    // - Hapus 'border' class agar tidak ada garis putih
+    // - Tambah 'flex-shrink-0' agar tombol tidak gepeng di mobile (bisa di-scroll)
+    // - Ubah padding jadi 'px-6 py-2.5' agar lebih besar dan berjarak
     const btnClass = isToday
-      ? "bg-purple-600 text-white border-purple-500"
-      : "bg-slate-800 text-slate-400 border-slate-700 hover:text-white hover:bg-slate-700";
+      ? "bg-purple-600 text-white shadow-lg shadow-purple-500/30 ring-1 ring-purple-400"
+      : "bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 border border-slate-700/50";
 
     dayTabs.innerHTML += `
         <a href="#${sectionId}" 
-           class="px-5 py-2 rounded-full text-sm font-bold border transition whitespace-nowrap scroll-mt-24 ${btnClass}">
+           class="w-full flex items-center justify-center px-4 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all duration-300 ${btnClass}">
            ${dayName} ${isToday ? "🔥" : ""}
         </a>
     `;
 
-    // Render Cards
+    // 2. RENDER CARDS (Tetap)
     let animeCards = "";
     item.anime_list.forEach((anime) => {
       const slug = anime.slug || anime.url.split("/").pop();
@@ -221,8 +224,9 @@ function renderSchedule(data) {
         <a href="detail.html?slug=${slug}" class="block group relative">
             <div class="relative aspect-[2/3] bg-slate-800 rounded-xl overflow-hidden hover:scale-105 transition-transform duration-300 shadow-lg border border-slate-700">
                 <img src="${anime.poster}" class="w-full h-full object-cover group-hover:opacity-80 transition" alt="${anime.title}">
+                
                 <div class="absolute bottom-0 w-full bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent p-3 pt-8">
-                    <h3 class="text-xs font-bold text-white line-clamp-2 group-hover:text-purple-400 transition-colors">
+                    <h3 class="text-xs sm:text-sm font-bold text-white line-clamp-2 group-hover:text-purple-400 transition-colors leading-tight">
                         ${anime.title}
                     </h3>
                 </div>
@@ -231,18 +235,23 @@ function renderSchedule(data) {
       `;
     });
 
-    // Wrapper Hari
+    // 3. WRAPPER HARI (Diperbaiki)
+    // - Menggunakan grid responsive (2 kolom di mobile, 5/6 di desktop)
+    // - Menambahkan 'pt-6' dan 'border-t' tipis sebagai pemisah antar hari
     scheduleContainer.innerHTML += `
-        <section id="${sectionId}" class="scroll-mt-32">
-            <div class="flex items-center gap-3 mb-6 border-b border-slate-800 pb-2">
-                <span class="text-2xl font-bold text-white">${dayName}</span>
+        <section id="${sectionId}" class="scroll-mt-32 pt-6 first:border-0 first:pt-0">
+            
+            <div class="flex items-center gap-3 mb-6 pb-2">
+                <div class="w-1 h-8 bg-purple-500 rounded-full"></div>
+                <span class="text-xl sm:text-2xl font-bold text-white tracking-wide">${dayName}</span>
                 ${
                   isToday
-                    ? '<span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Hari Ini</span>'
+                    ? '<span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider shadow-lg shadow-red-500/20">Hari Ini</span>'
                     : ""
                 }
             </div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
                 ${animeCards}
             </div>
         </section>

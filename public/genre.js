@@ -222,24 +222,63 @@ function extractAnimeList(json) {
 
 function getIconForGenre(name) {
   const n = name.toLowerCase();
+
+  // --- POPULAR / BIG GENRES ---
   if (n.includes("action")) return "⚔️";
   if (n.includes("adventure")) return "🗺️";
   if (n.includes("comedy")) return "🤣";
   if (n.includes("romance")) return "💖";
   if (n.includes("drama")) return "🎭";
+
+  // --- FANTASY & SUPERNATURAL ---
+  if (n.includes("isekai")) return "🌀";
   if (n.includes("fantasy")) return "🧚";
   if (n.includes("magic")) return "✨";
+  if (n.includes("supernatural")) return "👻";
+  if (n.includes("demon")) return "👹";
+  if (n.includes("vampire")) return "🧛";
+  if (n.includes("super power")) return "⚡";
+
+  // --- SCI-FI & TECH ---
+  if (n.includes("sci-fi")) return "🚀";
+  if (n.includes("mecha")) return "🤖";
+  if (n.includes("space")) return "🌌";
+  if (n.includes("cyberpunk")) return "🦾";
+
+  // --- DARK & MYSTERY ---
   if (n.includes("horror")) return "🧟";
   if (n.includes("mystery")) return "🕵️";
   if (n.includes("psychological")) return "🧠";
-  if (n.includes("sci-fi")) return "🚀";
+  if (n.includes("thriller")) return "🔪";
+  if (n.includes("gore")) return "🩸";
+
+  // --- LIFE & ACTIVITIES ---
   if (n.includes("slice of life")) return "🍰";
+  if (n.includes("school")) return "🏫";
   if (n.includes("sports")) return "⚽";
   if (n.includes("music")) return "🎵";
-  if (n.includes("mecha")) return "🤖";
-  if (n.includes("school")) return "🏫";
-  if (n.includes("isekai")) return "🌀";
+  if (n.includes("game")) return "🎮";
+  if (n.includes("food")) return "🍳";
+
+  // --- DEMOGRAPHICS ---
+  if (n.includes("shounen")) return "🔥";
+  if (n.includes("shoujo")) return "🎀";
+  if (n.includes("seinen")) return "🚬";
+  if (n.includes("josei")) return "💄";
+  if (n.includes("kids")) return "🎈";
+
+  // --- SPECIFIC THEMES ---
   if (n.includes("harem")) return "👯";
+  if (n.includes("ecchi")) return "🍑";
+  if (n.includes("martial arts")) return "🥋";
+  if (n.includes("samurai")) return "🗡️";
+  if (n.includes("historical")) return "🏯";
+  if (n.includes("military")) return "🪖";
+  if (n.includes("police")) return "🚓";
+  if (n.includes("parody")) return "🤡";
+  if (n.includes("idols")) return "🎤";
+
+  // Default Icon
   return "📺";
 }
 
