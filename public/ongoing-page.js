@@ -5,21 +5,33 @@ const ongoingList = document.getElementById("ongoingList");
 const pageTitle = document.getElementById("pageTitle");
 const pagination = document.getElementById("ongoingPagination");
 
-// Element Search
 const searchInput = document.getElementById("searchInput");
 const mobileSearchForm = document.getElementById("mobileSearchForm");
 const mobileSearchInput = document.getElementById("mobileSearchInput");
-
-// Element Navbar
 const mobileBtn = document.getElementById("mobile-menu-btn");
 const mobileMenu = document.getElementById("mobile-menu");
 
 const ONGOING_API = "https://www.sankavollerei.com/anime/ongoing-anime/";
 const SEARCH_API = "https://www.sankavollerei.com/anime/search/";
 
-// ==========================
-// 1. NAVIGASI (MENU SANDWICH)
-// ==========================
+// ✅ FUNGSI LOADING
+function showLoadingUI(container) {
+  if (!container) return;
+  container.innerHTML = `
+    <div class="col-span-full flex flex-col items-center justify-center py-20 min-h-[300px]">
+        <div class="relative flex items-center justify-center w-20 h-20 mb-4">
+             <div class="absolute inset-0 rounded-full border-[5px] border-slate-800 border-t-purple-500 animate-spin"></div>
+             <div class="absolute inset-2 rounded-full border-4 border-slate-800 opacity-50"></div>
+             <div class="relative bg-slate-900 rounded-full p-3 shadow-2xl shadow-purple-500/20">
+                 <img src="./img/Icon MangNime.png" class="w-8 h-8 object-contain animate-pulse" alt="Loading">
+             </div>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-1 tracking-wide">Memuat Ongoing...</h3>
+    </div>
+  `;
+}
+
+// 1. NAVIGASI
 if (mobileBtn && mobileMenu) {
   mobileBtn.addEventListener("click", () => {
     mobileMenu.classList.toggle("hidden");
@@ -27,12 +39,27 @@ if (mobileBtn && mobileMenu) {
 }
 
 // ==========================
-// 2. LOGIKA PENCARIAN (LIVE SEARCH)
+// 2. CACHE SYSTEM
 // ==========================
+function setCache(key, data) {
+  try {
+    localStorage.setItem(key, JSON.stringify({ timestamp: Date.now(), data }));
+  } catch (e) {}
+}
+
+function getCache(key, maxAge = 1000 * 60 * 15) {
+  // Cache 15 Menit
+  try {
+    const c = JSON.parse(localStorage.getItem(key));
+    if (c && Date.now() - c.timestamp < maxAge) return c.data;
+  } catch (e) {}
+  return null;
+}
+
+// 3. SEARCH
 async function handleLiveSearch(query) {
   const cleanQuery = query.trim();
 
-  // A. KEMBALI KE DEFAULT (Input < 3 huruf)
   if (cleanQuery.length < 3) {
     if (pageTitle) pageTitle.innerText = "🔥 Semua Ongoing Anime";
     if (pagination) pagination.style.display = "flex";
@@ -40,42 +67,46 @@ async function handleLiveSearch(query) {
     return;
   }
 
-  // B. MODE SEARCH
   if (pageTitle)
     pageTitle.innerHTML = `<span class="text-purple-400">🔍 Hasil:</span> "${cleanQuery}"`;
   if (pagination) pagination.style.display = "none";
 
-  if (ongoingList)
-    ongoingList.innerHTML = `<div class="col-span-full text-center text-white animate-pulse">Mencari...</div>`;
+  // Cek Cache Search
+  const cacheKey = `search-${cleanQuery}`;
+  const cachedData = getCache(cacheKey, 1000 * 60 * 5); // 5 Menit cache search
+  if (cachedData) {
+    renderSearchResults(cachedData);
+    return;
+  }
+
+  showLoadingUI(ongoingList);
 
   try {
     const res = await fetch(`${SEARCH_API}${cleanQuery}`);
     const json = await res.json();
-    const list = extractAnimeList(json);
-
-    if (ongoingList) ongoingList.innerHTML = "";
-
-    if (list.length > 0) {
-      // Gunakan tipe 'search' agar badge yang muncul adalah Episode, bukan Score
-      list.forEach((anime) => renderCard(ongoingList, anime, "search"));
-    } else {
-      ongoingList.innerHTML = `<div class="col-span-full text-center text-slate-400">Tidak ditemukan.</div>`;
-    }
+    setCache(cacheKey, json); // Simpan Cache
+    renderSearchResults(json);
   } catch (e) {
     console.error(e);
     ongoingList.innerHTML = `<div class="col-span-full text-center text-red-400">Error search.</div>`;
   }
 }
 
-// --- Event Listener Desktop ---
-if (searchInput) {
-  searchInput.addEventListener("keyup", function () {
-    handleLiveSearch(this.value);
-  });
+function renderSearchResults(json) {
+  const list = extractAnimeList(json);
+  if (ongoingList) ongoingList.innerHTML = "";
+  if (list.length > 0) {
+    list.forEach((anime) => renderCard(ongoingList, anime, "search"));
+  } else {
+    ongoingList.innerHTML = `<div class="col-span-full text-center text-slate-400">Tidak ditemukan.</div>`;
+  }
 }
 
-// --- Event Listener Mobile ---
-if (mobileSearchForm && mobileSearchInput) {
+if (searchInput)
+  searchInput.addEventListener("keyup", (e) =>
+    handleLiveSearch(e.target.value)
+  );
+if (mobileSearchForm) {
   mobileSearchForm.addEventListener("submit", (e) => {
     e.preventDefault();
     mobileSearchInput.blur();
@@ -83,19 +114,13 @@ if (mobileSearchForm && mobileSearchInput) {
   });
 }
 
-// ==========================
-// 3. HELPER & RENDER (UPDATED)
-// ==========================
-
-// ✅ FUNGSI RENDER CARD (SESUAI REQUEST BARU)
+// 4. HELPER & RENDER
 function renderCard(container, anime, type = "complete") {
-  // Ambil ID dari animeId
   const slug = anime.animeId || anime.href?.split("/").pop() || "#";
   const poster =
     anime.poster || "https://via.placeholder.com/300x400?text=No+Image";
   const title = anime.title || "No Title";
 
-  // Tampilkan Score jika Complete, Tampilkan Episode jika Ongoing/Search
   const label =
     type === "complete"
       ? `<div class="absolute top-2 left-2 bg-green-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md">⭐ ${
@@ -105,7 +130,6 @@ function renderCard(container, anime, type = "complete") {
           anime.episodes || "?"
         }</div>`;
 
-  // Tanggal rilis (Complete biasanya pakai lastReleaseDate)
   const dateInfo = anime.lastReleaseDate
     ? `Selesai: ${anime.lastReleaseDate}`
     : anime.releaseDay || "";
@@ -116,12 +140,8 @@ function renderCard(container, anime, type = "complete") {
         ${label}
         <img src="${poster}" alt="${title}" class="w-full h-64 object-cover">
         <div class="absolute bottom-0 w-full bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent p-3 pt-8">
-          <h3 class="text-sm font-bold text-white line-clamp-2 group-hover:text-purple-400 transition-colors">
-            ${title}
-          </h3>
-          <p class="text-[10px] text-gray-400 mt-1">
-             ${dateInfo}
-          </p>
+          <h3 class="text-sm font-bold text-white line-clamp-2 group-hover:text-purple-400 transition-colors">${title}</h3>
+          <p class="text-[10px] text-gray-400 mt-1">${dateInfo}</p>
         </div>
       </div>
     </a>
@@ -133,39 +153,60 @@ function extractAnimeList(json) {
   if (json.data && Array.isArray(json.data.animeList))
     return json.data.animeList;
   if (Array.isArray(json.animeList)) return json.animeList;
+  if (json.data && Array.isArray(json.data)) return json.data;
   return [];
 }
 
 async function getOngoing(page = 1) {
+  const cacheKey = `ongoing-page-${page}`;
+  const cachedData = getCache(cacheKey);
+
+  if (cachedData) {
+    if (ongoingList) ongoingList.innerHTML = "";
+    const list = extractAnimeList(cachedData);
+    list.forEach((a) => renderCard(ongoingList, a, "ongoing"));
+    renderPaginationUI(page);
+    return;
+  }
+
   try {
+    showLoadingUI(ongoingList);
+
     const res = await fetch(`${ONGOING_API}?page=${page}`);
     const json = await res.json();
+
+    setCache(cacheKey, json); // Simpan Cache
+
     const list = extractAnimeList(json);
     if (ongoingList) ongoingList.innerHTML = "";
-
-    // Pass "ongoing" agar badge yang muncul adalah Episode
     list.forEach((a) => renderCard(ongoingList, a, "ongoing"));
-
     renderPaginationUI(page);
   } catch (e) {
     console.error(e);
+    if (ongoingList)
+      ongoingList.innerHTML = `<div class="col-span-full text-center text-red-400">Gagal memuat data.</div>`;
   }
 }
 
+// ✅ RENDER PAGINATION (BUTTON STYLE DIPERBAIKI)
 function renderPaginationUI(page) {
   if (!pagination) return;
   pagination.innerHTML = `
-        <button onclick="getOngoing(${
-          page - 1
-        })" class="px-4 py-2 bg-slate-800 rounded" ${
-    page <= 1 ? "disabled" : ""
-  }>Prev</button>
-        <span class="px-4 py-2 text-purple-400 font-bold">${page}</span>
-        <button onclick="getOngoing(${
-          page + 1
-        })" class="px-4 py-2 bg-slate-800 rounded">Next</button>
-    `;
+    <button onclick="getOngoing(${page - 1})" 
+        class="px-4 py-2 bg-slate-800 text-white rounded hover:bg-slate-700 transition disabled:opacity-50 disabled:cursor-not-allowed" 
+        ${page <= 1 ? "disabled" : ""}>
+        Prev
+    </button>
+    
+    <span class="px-4 py-2 bg-purple-600 text-white font-bold rounded">
+        ${page}
+    </span>
+    
+    <button onclick="getOngoing(${page + 1})" 
+        class="px-4 py-2 bg-slate-800 text-white rounded hover:bg-slate-700 transition">
+        Next
+    </button>
+  `;
 }
 
-// Load Awal
 getOngoing(1);
