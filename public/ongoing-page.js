@@ -48,7 +48,6 @@ function setCache(key, data) {
 }
 
 function getCache(key, maxAge = 1000 * 60 * 15) {
-  // Cache 15 Menit
   try {
     const c = JSON.parse(localStorage.getItem(key));
     if (c && Date.now() - c.timestamp < maxAge) return c.data;
@@ -71,9 +70,8 @@ async function handleLiveSearch(query) {
     pageTitle.innerHTML = `<span class="text-purple-400">🔍 Hasil:</span> "${cleanQuery}"`;
   if (pagination) pagination.style.display = "none";
 
-  // Cek Cache Search
   const cacheKey = `search-${cleanQuery}`;
-  const cachedData = getCache(cacheKey, 1000 * 60 * 5); // 5 Menit cache search
+  const cachedData = getCache(cacheKey, 1000 * 60 * 5);
   if (cachedData) {
     renderSearchResults(cachedData);
     return;
@@ -84,7 +82,7 @@ async function handleLiveSearch(query) {
   try {
     const res = await fetch(`${SEARCH_API}${cleanQuery}`);
     const json = await res.json();
-    setCache(cacheKey, json); // Simpan Cache
+    setCache(cacheKey, json);
     renderSearchResults(json);
   } catch (e) {
     console.error(e);
@@ -114,31 +112,36 @@ if (mobileSearchForm) {
   });
 }
 
-// 4. HELPER & RENDER
-function renderCard(container, anime, type = "complete") {
+// 4. HELPER & RENDER (DISESUAIKAN DENGAN HOME)
+function renderCard(container, anime, type = "ongoing") {
   const slug = anime.animeId || anime.href?.split("/").pop() || "#";
   const poster =
     anime.poster || "https://via.placeholder.com/300x400?text=No+Image";
   const title = anime.title || "No Title";
 
-  const label =
-    type === "complete"
-      ? `<div class="absolute top-2 left-2 bg-green-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md">⭐ ${
-          anime.score || "-"
-        }</div>`
-      : `<div class="absolute top-2 left-2 bg-purple-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md">Ep ${
-          anime.episodes || "?"
-        }</div>`;
+  // Label Logic (Sama seperti di Home)
+  let label = "";
+  if (type === "complete" || anime.status === "Completed") {
+    label = `<div class="absolute top-2 left-2 bg-green-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md z-10">⭐ ${
+      anime.score || "-"
+    }</div>`;
+  } else if (anime.episodes) {
+    label = `<div class="absolute top-2 left-2 bg-purple-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md z-10">Ep ${anime.episodes}</div>`;
+  } else {
+    label = `<div class="absolute top-2 left-2 bg-gray-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md z-10">Anime</div>`;
+  }
 
   const dateInfo = anime.lastReleaseDate
     ? `Selesai: ${anime.lastReleaseDate}`
     : anime.releaseDay || "";
 
+  // Render HTML (Sama persis dengan app.js)
   container.innerHTML += `
     <a href="detail.html?slug=${slug}" class="block group">
       <div class="relative bg-slate-900 rounded-xl overflow-hidden hover:scale-105 transition-transform duration-300 shadow-lg border border-slate-800">
         ${label}
         <img src="${poster}" alt="${title}" class="w-full h-64 object-cover">
+        
         <div class="absolute bottom-0 w-full bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent p-3 pt-8">
           <h3 class="text-sm font-bold text-white line-clamp-2 group-hover:text-purple-400 transition-colors">${title}</h3>
           <p class="text-[10px] text-gray-400 mt-1">${dateInfo}</p>
@@ -171,12 +174,9 @@ async function getOngoing(page = 1) {
 
   try {
     showLoadingUI(ongoingList);
-
     const res = await fetch(`${ONGOING_API}?page=${page}`);
     const json = await res.json();
-
-    setCache(cacheKey, json); // Simpan Cache
-
+    setCache(cacheKey, json);
     const list = extractAnimeList(json);
     if (ongoingList) ongoingList.innerHTML = "";
     list.forEach((a) => renderCard(ongoingList, a, "ongoing"));
@@ -188,7 +188,6 @@ async function getOngoing(page = 1) {
   }
 }
 
-// ✅ RENDER PAGINATION (BUTTON STYLE DIPERBAIKI)
 function renderPaginationUI(page) {
   if (!pagination) return;
   pagination.innerHTML = `
@@ -197,11 +196,9 @@ function renderPaginationUI(page) {
         ${page <= 1 ? "disabled" : ""}>
         Prev
     </button>
-    
     <span class="px-4 py-2 bg-purple-600 text-white font-bold rounded">
         ${page}
     </span>
-    
     <button onclick="getOngoing(${page + 1})" 
         class="px-4 py-2 bg-slate-800 text-white rounded hover:bg-slate-700 transition">
         Next
