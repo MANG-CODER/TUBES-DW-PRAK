@@ -108,29 +108,43 @@ function extractAnimeList(json) {
   return [];
 }
 
-function renderCard(container, anime, type = "complete") {
+function renderCard(container, anime, type = "ongoing") {
   const slug = anime.animeId || anime.href?.split("/").pop() || "#";
   const poster =
     anime.poster || "https://via.placeholder.com/300x400?text=No+Image";
   const title = anime.title || "No Title";
+
+  // Label Logic (Sama seperti di Home)
   let label = "";
-  const episodeCount = anime.episodes || anime.episode;
-  const scoreCount = anime.score;
-  const isComplete = type === "complete" || anime.status === "Completed";
-  if (isComplete)
-    label = `<div class="absolute top-2 left-2 bg-green-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md">⭐ ${
-      scoreCount || "-"
+  if (type === "complete" || anime.status === "Completed") {
+    label = `<div class="absolute top-2 left-2 bg-green-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md z-10">⭐ ${
+      anime.score || "-"
     }</div>`;
-  else if (episodeCount)
-    label = `<div class="absolute top-2 left-2 bg-purple-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md">Ep ${episodeCount}</div>`;
-  else
-    label = `<div class="absolute top-2 left-2 bg-gray-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md">Anime</div>`;
+  } else if (anime.episodes) {
+    label = `<div class="absolute top-2 left-2 bg-purple-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md z-10">Ep ${anime.episodes}</div>`;
+  } else {
+    label = `<div class="absolute top-2 left-2 bg-gray-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md z-10">Anime</div>`;
+  }
+
   const dateInfo = anime.lastReleaseDate
     ? `Selesai: ${anime.lastReleaseDate}`
     : anime.releaseDay || "";
-  container.innerHTML += `<a href="detail.html?slug=${slug}" class="block group"><div class="relative bg-slate-900 rounded-xl overflow-hidden hover:scale-105 transition-transform duration-300 shadow-lg border border-slate-800"><div class="absolute top-2 left-2 bg-purple-600 px-3 py-1 text-[11px] font-bold text-white rounded shadow-md z-10">${label}</div><img src="${poster}" alt="${title}" class="w-full h-64 object-cover"><div class="absolute bottom-0 w-full bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent p-3 pt-8"><h3 class="text-sm font-bold text-white line-clamp-2 group-hover:text-purple-400 transition-colors">${title}</h3><p class="text-[10px] text-gray-400 mt-1">${dateInfo}</p></div></div></a>`;
-}
 
+  // Render HTML (Sama persis dengan app.js)
+  container.innerHTML += `
+    <a href="detail.html?slug=${slug}" class="block group">
+      <div class="relative bg-slate-900 rounded-xl overflow-hidden hover:scale-105 transition-transform duration-300 shadow-lg border border-slate-800">
+        ${label}
+        <img src="${poster}" alt="${title}" class="w-full h-64 object-cover">
+        
+        <div class="absolute bottom-0 w-full bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent p-3 pt-8">
+          <h3 class="text-sm font-bold text-white line-clamp-2 group-hover:text-purple-400 transition-colors">${title}</h3>
+          <p class="text-[10px] text-gray-400 mt-1">${dateInfo}</p>
+        </div>
+      </div>
+    </a>
+  `;
+}
 function renderPagination(container, currentPage, callbackName) {
   if (!container) return;
   container.innerHTML = `<button onclick="${callbackName}(${

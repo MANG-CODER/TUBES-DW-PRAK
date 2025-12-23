@@ -1,72 +1,80 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
-  <title>Download Batch - MangNime</title>
+  <title>Terms - MangNime</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="../src/output.css" rel="stylesheet">
   <link rel="icon" type="image/png" href="./img/Icon MangNime.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-[#0f172a] text-slate-200 font-['Inter'] min-h-screen flex flex-col">
 
-  <nav class="sticky top-0 z-50 bg-[#0f172a]/90 backdrop-blur-md border-b border-slate-800 px-6 py-3 flex justify-between items-center">
-    <div class="flex items-center gap-4">
-        <a href="javascript:history.back()" 
-           class="p-2 rounded-full bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-all border border-slate-700 group"
-           title="Kembali">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
+<body class="bg-[#0f172a] text-slate-200 antialiased flex flex-col min-h-screen">
+
+  <nav class="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="index.html" class="flex-shrink-0">
+          <img class="h-10 w-auto hover:scale-105 transition-transform" src="./img/Logo MangNime.png" alt="MangNime">
         </a>
-        
-        <a href="index.html" class="flex items-center gap-2">
-            <img class="h-8 w-auto hover:opacity-80 transition" src="./img/Logo MangNime.png" alt="MangNime">
-        </a>
-    </div>
-    
-    <div class="hidden sm:block">
-        <span class="text-xs font-bold text-green-400 bg-green-900/20 px-3 py-1.5 rounded-full border border-green-500/20 uppercase tracking-wide">
-            Batch Download Area
-        </span>
+        <div class="hidden md:flex space-x-8 text-sm font-medium">
+          <a href="index.html" class="hover:text-purple-400">Home</a>
+          <a href="ongoing.html" class="hover:text-purple-400">Ongoing</a>
+          <a href="complete.html" class="hover:text-purple-400">Complete</a>
+          <a href="schedule.html" class="hover:text-purple-400">Schedule</a>
+        </div>
+      </div>
     </div>
   </nav>
 
-  <main class="flex-grow max-w-4xl mx-auto w-full px-4 py-10">
+  <main class="flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     
-    <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-2xl flex flex-col sm:flex-row gap-6 items-center sm:items-start mb-8 relative overflow-hidden">
-        <div class="absolute -top-10 -right-10 w-40 h-40 bg-green-600/10 blur-3xl rounded-full pointer-events-none"></div>
-        
-        <img id="animePoster" class="relative z-10 w-32 h-48 object-cover rounded-xl shadow-lg bg-slate-800" src="" alt="Poster">
-        
-        <div class="relative z-10 flex-1 text-center sm:text-left space-y-3">
-            <h1 id="animeTitle" class="text-2xl font-extrabold text-white leading-tight">Memuat Data...</h1>
-            
-            <div class="flex flex-wrap justify-center sm:justify-start gap-3 text-xs font-semibold text-slate-400">
-                <span class="bg-slate-800 px-2 py-1 rounded border border-slate-700">Episodes: <span id="animeEpisodes" class="text-white">-</span></span>
-                <span class="bg-slate-800 px-2 py-1 rounded border border-slate-700">Status: <span id="animeStatus" class="text-purple-400">-</span></span>
-            </div>
-
-            <div id="genreList" class="flex flex-wrap justify-center sm:justify-start gap-2 pt-1"></div>
-        </div>
+    <div class="border-b border-slate-800 pb-8 mb-8">
+      <h1 class="text-3xl font-bold text-white mb-2">Terms of Service</h1>
+      <p class="text-slate-500 text-sm">Last Updated: December 2025</p>
     </div>
 
-    <div class="space-y-4">
-        <h3 class="text-lg font-bold text-white flex items-center gap-2 mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            Pilih Resolusi & Server
-        </h3>
+    <div class="space-y-8 text-slate-300 leading-relaxed text-justify">
+      
+      <section>
+        <h2 class="text-xl font-bold text-purple-400 mb-4">1. Acceptance of Terms</h2>
+        <p>
+          Dengan mengakses dan menggunakan situs web <strong>MangNime</strong>, Anda setuju untuk mematuhi dan terikat oleh Syarat dan Ketentuan ini. Jika Anda tidak setuju dengan bagian mana pun dari syarat-syarat ini, harap jangan gunakan layanan kami.
+        </p>
+      </section>
 
-        <div id="downloadContainer" class="space-y-4">
-            <div class="animate-pulse space-y-4">
-                <div class="h-24 bg-slate-900 rounded-xl border border-slate-800"></div>
-                <div class="h-24 bg-slate-900 rounded-xl border border-slate-800"></div>
-            </div>
-        </div>
+      <section>
+        <h2 class="text-xl font-bold text-purple-400 mb-4">2. Content Disclaimer</h2>
+        <p class="mb-4">
+          MangNime adalah situs indeks link yang menyediakan tautan ke konten yang di-host oleh pihak ketiga. Kami tidak menyimpan, mengunggah, atau mendistribusikan materi video apa pun di server kami sendiri.
+        </p>
+        <ul class="list-disc list-inside space-y-2 ml-2 text-slate-400">
+          <li>Semua video di-host oleh layanan pihak ketiga (seperti Google Drive, Vidhide, dll).</li>
+          <li>Kami tidak bertanggung jawab atas ketersediaan, kualitas, atau legalitas konten tersebut.</li>
+          <li>Penggunaan layanan ini sepenuhnya merupakan risiko Anda sendiri.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-bold text-purple-400 mb-4">3. User Conduct</h2>
+        <p>
+          Saat menggunakan situs ini, Anda setuju untuk tidak:
+        </p>
+        <ul class="list-disc list-inside space-y-2 ml-2 text-slate-400 mt-2">
+          <li>Menggunakan situs untuk tujuan ilegal atau melanggar hukum.</li>
+          <li>Mencoba merusak, membebani, atau mengganggu server dan jaringan kami.</li>
+          <li>Melakukan scraping atau pengambilan data otomatis tanpa izin.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-bold text-purple-400 mb-4">4. Changes to Terms</h2>
+        <p>
+          Kami berhak untuk mengubah atau mengganti Syarat ini kapan saja. Merupakan tanggung jawab Anda untuk memeriksa halaman ini secara berkala untuk mengetahui perubahan.
+        </p>
+      </section>
+
     </div>
-
   </main>
 
   <footer class="bg-slate-900 border-t border-slate-800 mt-10 pt-10 pb-8">
@@ -94,22 +102,22 @@
         </div>
         </div>
 
-      <div class="md:col-span-2">
+      <div class="lg:col-span-2">
         <h3 class="text-white font-bold mb-6">Jelajahi</h3>
         <ul class="space-y-3 text-sm text-slate-400">
-          <li><a href="schedule.html" class="hover:text-purple-400 transition-colors">Schedule</a></li>
-          <li><a href="ongoing.html" class="hover:text-purple-400 transition-colors">Ongoing</a></li>
-          <li><a href="complete.html" class="hover:text-purple-400 transition-colors">Complete</a></li>
-          <li><a href="genre.html" class="hover:text-purple-400 transition-colors">Genre</a></li>
+          <li><a href="schedule.html" class="hover:text-purple-400">Schedule</a></li>
+          <li><a href="ongoing.html" class="hover:text-purple-400">Ongoing</a></li>
+          <li><a href="complete.html" class="hover:text-purple-400">Complete</a></li>
+          <li><a href="genre.html" class="hover:text-purple-400">Genre</a></li>
         </ul>
       </div>
-          
-      <div class="md:col-span-2">
+      
+      <div class="lg:col-span-2">
         <h3 class="text-white font-bold mb-6">Bantuan</h3>
         <ul class="space-y-3 text-sm text-slate-400">
-          <li><a href="cara-streaming.html" class="hover:text-purple-400 transition-colors">Cara Streaming</a></li>
-          <li><a href="cara-download.html" class="hover:text-purple-400 transition-colors">Cara Download</a></li>
-          <li><a href="dmca.html" class="hover:text-purple-400 transition-colors">DMCA</a></li>
+          <li><a href="cara-streaming.html" class="hover:text-purple-400">Cara Streaming</a></li>
+          <li><a href="cara-download.html" class="hover:text-purple-400">Cara Download</a></li>
+          <li><a href="dmca.html" class="hover:text-purple-400">DMCA</a></li>
         </ul>
       </div>
 
@@ -121,24 +129,20 @@
         </a>
       </div>
 
-    </div>
-
-    <div class="border-b border-slate-800"></div>
+    </div> <div class="border-b border-slate-800"></div>
 
     <div class="pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
       <div class="text-slate-500 text-xs text-center md:text-left space-y-1">
         <p>&copy; 2025 MangNime. Dibuat dengan ❤️ untuk Wibu Indonesia.</p>
-        <p class="text-slate-600">Tidak menyimpan file video di server sendiri. Semua konten disediakan oleh pihak ketiga non-afiliasi.</p>
+        <p class="text-slate-600">Tidak menyimpan file video di server sendiri.</p>
       </div>
       <div class="flex gap-6 text-sm text-slate-500">
-        <a href="terms.html" class="hover:text-purple-400 transition-colors">Terms</a>
-        <a href="privacy.html" class="hover:text-purple-400 transition-colors">Privacy</a>
+        <a href="terms.html" class="text-purple-400 font-semibold">Terms</a>
+        <a href="privacy.html" class="hover:text-purple-400">Privacy</a>
       </div>
     </div>
-    
   </div>
 </footer>
 
-  <script src="batch.js"></script>
 </body>
 </html>

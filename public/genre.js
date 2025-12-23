@@ -177,13 +177,67 @@ function extractAnimeList(json) {
 }
 function getIconForGenre(name) {
   const n = name.toLowerCase();
+
+  // Action & Adventure
   if (n.includes("action")) return "⚔️";
   if (n.includes("adventure")) return "🗺️";
+  if (n.includes("martial")) return "🥋";
+  if (n.includes("samurai")) return "🤺";
+  if (n.includes("super power") || n.includes("superpower")) return "⚡";
+
+  // Comedy & Slice of Life
   if (n.includes("comedy")) return "🤣";
+  if (n.includes("slice of life") || n.includes("slice")) return "🍃";
+  if (n.includes("parody")) return "🤡";
+
+  // Romance & Drama
   if (n.includes("romance")) return "💖";
+  if (n.includes("love")) return "💌";
   if (n.includes("drama")) return "🎭";
+  if (n.includes("shoujo")) return "🌸";
+  if (n.includes("shounen")) return "🔥";
+  if (n.includes("josei")) return "💄";
+  if (n.includes("seinen")) return "🚬";
+  if (n.includes("harem")) return "👯‍♂️";
+
+  // Fantasy & Supernatural
+  if (n.includes("fantasy")) return "🧙‍♂️";
+  if (n.includes("magic")) return "✨";
   if (n.includes("isekai")) return "🌀";
+  if (n.includes("supernatural")) return "👻";
+  if (n.includes("demon")) return "👹";
+  if (n.includes("vampire")) return "🧛";
+
+  // Sci-Fi & Mecha
+  if (n.includes("sci-fi") || n.includes("sci")) return "🚀";
+  if (n.includes("mecha")) return "🤖";
+  if (n.includes("space")) return "🌌";
+
+  // Mystery, Horror, Thriller
+  if (n.includes("mystery")) return "🕵️‍♂️";
+  if (n.includes("horror")) return "🧟";
+  if (n.includes("thriller")) return "🔪";
+  if (n.includes("psychological")) return "🧠";
+  if (n.includes("police")) return "👮";
+
+  // School & Sports
+  if (n.includes("school")) return "🏫";
+  if (n.includes("sports") || n.includes("sport")) return "⚽";
+  if (n.includes("cars")) return "🏎️";
+
+  // Music & Arts
+  if (n.includes("music")) return "🎵";
+  if (n.includes("idol")) return "🎤";
+
+  // Others
+  if (n.includes("game")) return "🎮";
+  if (n.includes("military")) return "🎖️";
+  if (n.includes("historical")) return "📜";
+  if (n.includes("kids")) return "👶";
+  if (n.includes("food") || n.includes("gourmet")) return "🍖";
+  if (n.includes("ecchi")) return "💋";
+
+  // Default
   return "📺";
 }
-
 loadGenres();
