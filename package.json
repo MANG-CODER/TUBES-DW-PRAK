@@ -1,5 +1,5 @@
 {
-  "name": "MangNime",
+  "name": "mangnime",
   "version": "1.0.0",
   "scripts": {
     "dev": "tailwindcss -i ./src/input.css -o ./src/output.css --watch",
