@@ -1,6 +1,11 @@
 {
+  "name": "MangNime",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "tailwindcss -i ./src/input.css -o ./src/output.css --watch",
+    "build": "tailwindcss -i ./src/input.css -o ./src/output.css --minify && cp src/output.css public/output.css"
+  },
   "dependencies": {
-    "@tailwindcss/cli": "^4.1.17",
     "tailwindcss": "^4.1.17"
   }
 }
