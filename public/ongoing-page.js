@@ -113,13 +113,13 @@ if (mobileSearchForm) {
 }
 
 // 4. HELPER & RENDER (DISESUAIKAN DENGAN HOME)
-function renderCard(container, anime, type = "ongoing") {
-  const slug = anime.animeId || anime.href?.split("/").pop() || "#";
+function generateCardHTML(anime, type = "ongoing") {
+  const slug =
+    anime.animeId || (anime.href ? anime.href.split("/").pop() : "#");
   const poster =
     anime.poster || "https://via.placeholder.com/300x400?text=No+Image";
   const title = anime.title || "No Title";
 
-  // Label Logic (Sama seperti di Home)
   let label = "";
   if (type === "complete" || anime.status === "Completed") {
     label = `<div class="absolute top-2 left-2 bg-green-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md z-10">⭐ ${
@@ -135,14 +135,16 @@ function renderCard(container, anime, type = "ongoing") {
     ? `Selesai: ${anime.lastReleaseDate}`
     : anime.releaseDay || "";
 
-  // Render HTML (Sama persis dengan app.js)
-  container.innerHTML += `
-    <a href="detail.html?slug=${slug}" class="block group">
-      <div class="relative bg-slate-900 rounded-xl overflow-hidden hover:scale-105 transition-transform duration-300 shadow-lg border border-slate-800">
+  return `
+    <a href="detail.html?slug=${slug}" class="block group w-full h-full">
+      <div class="relative bg-slate-900 rounded-xl overflow-hidden hover:scale-105 transition-transform duration-300 shadow-lg border border-slate-800 flex flex-col h-full">
         ${label}
-        <img src="${poster}" alt="${title}" class="w-full h-64 object-cover">
         
-        <div class="absolute bottom-0 w-full bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent p-3 pt-8">
+        <div class="relative w-full overflow-hidden" style="padding-top: 140%;">
+            <img src="${poster}" alt="${title}" class="absolute top-0 left-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+        </div>
+        
+        <div class="flex-1 bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent p-3 pt-4 flex flex-col justify-end">
           <h3 class="text-sm font-bold text-white line-clamp-2 group-hover:text-purple-400 transition-colors">${title}</h3>
           <p class="text-[10px] text-gray-400 mt-1">${dateInfo}</p>
         </div>
@@ -164,10 +166,24 @@ async function getOngoing(page = 1) {
   const cacheKey = `ongoing-page-${page}`;
   const cachedData = getCache(cacheKey);
 
+  // Helper render
+  const renderList = (dataList) => {
+    if (ongoingList) {
+      if (dataList.length > 0) {
+        // PANGGIL FUNGSI generateCardHTML YANG BARU DI ATAS
+        const allCardsHTML = dataList
+          .map((anime) => generateCardHTML(anime, "ongoing"))
+          .join("");
+        ongoingList.innerHTML = allCardsHTML;
+      } else {
+        ongoingList.innerHTML = `<div class="col-span-full text-center text-red-400 w-full">Data Kosong.</div>`;
+      }
+    }
+  };
+
   if (cachedData) {
-    if (ongoingList) ongoingList.innerHTML = "";
     const list = extractAnimeList(cachedData);
-    list.forEach((a) => renderCard(ongoingList, a, "ongoing"));
+    renderList(list);
     renderPaginationUI(page);
     return;
   }
@@ -177,14 +193,14 @@ async function getOngoing(page = 1) {
     const res = await fetch(`${ONGOING_API}?page=${page}`);
     const json = await res.json();
     setCache(cacheKey, json);
+
     const list = extractAnimeList(json);
-    if (ongoingList) ongoingList.innerHTML = "";
-    list.forEach((a) => renderCard(ongoingList, a, "ongoing"));
+    renderList(list);
     renderPaginationUI(page);
   } catch (e) {
     console.error(e);
     if (ongoingList)
-      ongoingList.innerHTML = `<div class="col-span-full text-center text-red-400">Gagal memuat data.</div>`;
+      ongoingList.innerHTML = `<div class="col-span-full text-center text-red-400 w-full">Gagal memuat data.</div>`;
   }
 }
 
