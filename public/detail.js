@@ -128,6 +128,7 @@ function renderDetail(anime) {
   if (watchBtn) {
     if (safeEpisodes.length > 0 && safeEpisodes[0].episodeId) {
       watchBtn.href = `watch.html?slug=${safeEpisodes[0].episodeId}`;
+      watchBtn.classList.remove("hidden");
       watchBtn.classList.remove(
         "opacity-50",
         "cursor-not-allowed",
