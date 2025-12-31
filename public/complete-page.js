@@ -1,15 +1,21 @@
+// ==========================
+// SETUP VARIABEL
+// ==========================
 const completeList = document.getElementById("completeList");
 const completePagination = document.getElementById("completePagination");
 const pageTitle = document.getElementById("pageTitle");
+
 const searchInput = document.getElementById("searchInput");
 const mobileSearchForm = document.getElementById("mobileSearchForm");
 const mobileSearchInput = document.getElementById("mobileSearchInput");
 const mobileBtn = document.getElementById("mobile-menu-btn");
 const mobileMenu = document.getElementById("mobile-menu");
+
 const COMPLETE_API = "https://www.sankavollerei.com/anime/complete-anime";
 const SEARCH_API = "https://www.sankavollerei.com/anime/search/";
 let completePage = 1;
 
+// ✅ FUNGSI LOADING
 function showLoadingUI(container) {
   if (!container) return;
   container.innerHTML = `
@@ -46,6 +52,9 @@ function getCache(key, maxAge = 1000 * 60 * 25) {
   return null;
 }
 
+// ==========================
+// SEARCH LOGIC
+// ==========================
 async function handleLiveSearch(query) {
   const cleanQuery = query.trim();
   if (cleanQuery.length < 3) {
@@ -54,6 +63,7 @@ async function handleLiveSearch(query) {
     getComplete(1);
     return;
   }
+
   if (pageTitle)
     pageTitle.innerHTML = `<span class="text-purple-400">🔍 Hasil:</span> "${cleanQuery}"`;
   if (completePagination) completePagination.style.display = "none";
@@ -61,8 +71,23 @@ async function handleLiveSearch(query) {
   // Search Cache
   const cacheKey = `search-${cleanQuery}`;
   const cachedData = getCache(cacheKey, 1000 * 60 * 5); // 5 menit cache search
+
+  // Helper render search
+  const renderSearch = (list) => {
+    if (completeList) {
+      if (list && list.length > 0) {
+        const html = list
+          .map((anime) => generateCardHTML(anime, "search"))
+          .join("");
+        completeList.innerHTML = html;
+      } else {
+        completeList.innerHTML = `<div class="col-span-full text-center text-slate-400">Tidak ditemukan.</div>`;
+      }
+    }
+  };
+
   if (cachedData) {
-    displaySearchResults(extractAnimeList(cachedData));
+    renderSearch(extractAnimeList(cachedData));
     return;
   }
 
@@ -71,20 +96,12 @@ async function handleLiveSearch(query) {
     const res = await fetch(`${SEARCH_API}${cleanQuery}`);
     const json = await res.json();
     setCache(cacheKey, json);
-    displaySearchResults(extractAnimeList(json));
+    renderSearch(extractAnimeList(json));
   } catch (err) {
     console.error(err);
     if (completeList)
       completeList.innerHTML = `<div class="col-span-full text-center text-red-400">Error search.</div>`;
   }
-}
-
-function displaySearchResults(list) {
-  if (completeList) completeList.innerHTML = "";
-  if (list && list.length > 0)
-    list.forEach((anime) => renderCard(completeList, anime, "search"));
-  else
-    completeList.innerHTML = `<div class="col-span-full text-center text-slate-400">Tidak ditemukan.</div>`;
 }
 
 if (searchInput)
@@ -108,13 +125,17 @@ function extractAnimeList(json) {
   return [];
 }
 
-function renderCard(container, anime, type = "ongoing") {
-  const slug = anime.animeId || anime.href?.split("/").pop() || "#";
+// ==========================
+// CARD GENERATOR
+// ==========================
+function generateCardHTML(anime, type = "ongoing") {
+  const slug =
+    anime.animeId || (anime.href ? anime.href.split("/").pop() : "#");
   const poster =
     anime.poster || "https://via.placeholder.com/300x400?text=No+Image";
   const title = anime.title || "No Title";
 
-  // Label Logic (Sama seperti di Home)
+  // Label Logic
   let label = "";
   if (type === "complete" || anime.status === "Completed") {
     label = `<div class="absolute top-2 left-2 bg-green-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md z-10">⭐ ${
@@ -130,14 +151,16 @@ function renderCard(container, anime, type = "ongoing") {
     ? `Selesai: ${anime.lastReleaseDate}`
     : anime.releaseDay || "";
 
-  // Render HTML (Sama persis dengan app.js)
-  container.innerHTML += `
-    <a href="detail.html?slug=${slug}" class="block group">
-      <div class="relative bg-slate-900 rounded-xl overflow-hidden hover:scale-105 transition-transform duration-300 shadow-lg border border-slate-800">
+  return `
+    <a href="detail.html?slug=${slug}" class="block group w-full h-full">
+      <div class="relative bg-slate-900 rounded-xl overflow-hidden hover:scale-105 transition-transform duration-300 shadow-lg border border-slate-800 flex flex-col h-full">
         ${label}
-        <img src="${poster}" alt="${title}" class="w-full h-64 object-cover">
         
-        <div class="absolute bottom-0 w-full bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent p-3 pt-8">
+        <div class="relative w-full overflow-hidden" style="padding-top: 140%;">
+            <img src="${poster}" alt="${title}" class="absolute top-0 left-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+        </div>
+        
+        <div class="flex-1 bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent p-3 pt-4 flex flex-col justify-end">
           <h3 class="text-sm font-bold text-white line-clamp-2 group-hover:text-purple-400 transition-colors">${title}</h3>
           <p class="text-[10px] text-gray-400 mt-1">${dateInfo}</p>
         </div>
@@ -145,7 +168,8 @@ function renderCard(container, anime, type = "ongoing") {
     </a>
   `;
 }
-function renderPagination(container, currentPage, callbackName) {
+
+function renderPaginationUI(container, currentPage, callbackName) {
   if (!container) return;
   container.innerHTML = `<button onclick="${callbackName}(${
     currentPage - 1
@@ -156,16 +180,30 @@ function renderPagination(container, currentPage, callbackName) {
   })" class="px-4 py-2 bg-slate-800 text-white rounded hover:bg-slate-700 transition">Next</button>`;
 }
 
+// ==========================
+// MAIN LOGIC
+// ==========================
 async function getComplete(page = 1) {
   completePage = page;
   const cacheKey = `complete-page-${page}`;
   const cachedData = getCache(cacheKey);
 
+  const renderList = (list) => {
+    if (completeList) {
+      if (list.length > 0) {
+        const html = list
+          .map((anime) => generateCardHTML(anime, "complete"))
+          .join("");
+        completeList.innerHTML = html;
+        renderPaginationUI(completePagination, completePage, "getComplete");
+      } else {
+        completeList.innerHTML = `<div class="col-span-full text-center text-red-400">Data Kosong</div>`;
+      }
+    }
+  };
+
   if (cachedData) {
-    const list = extractAnimeList(cachedData);
-    if (completeList) completeList.innerHTML = "";
-    list.forEach((anime) => renderCard(completeList, anime, "complete"));
-    renderPagination(completePagination, completePage, "getComplete");
+    renderList(extractAnimeList(cachedData));
     return;
   }
 
@@ -174,16 +212,8 @@ async function getComplete(page = 1) {
   try {
     const res = await fetch(`${COMPLETE_API}?page=${page}`);
     const json = await res.json();
-    const list = extractAnimeList(json);
-    if (list.length > 0) {
-      setCache(cacheKey, json);
-      if (completeList) completeList.innerHTML = "";
-      list.forEach((anime) => renderCard(completeList, anime, "complete"));
-      renderPagination(completePagination, completePage, "getComplete");
-    } else {
-      if (completeList)
-        completeList.innerHTML = `<div class="col-span-full text-center text-red-400">Data Kosong</div>`;
-    }
+    setCache(cacheKey, json);
+    renderList(extractAnimeList(json));
   } catch (err) {
     console.error(err);
     if (completeList)
