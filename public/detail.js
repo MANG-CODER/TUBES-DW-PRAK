@@ -6,6 +6,7 @@ const title = document.getElementById("animeTitle");
 const status = document.getElementById("animeStatus");
 const studio = document.getElementById("animeStudios");
 const aired = document.getElementById("animeAired");
+const synopsis = document.getElementById("animeSynopsis");
 const episode = document.getElementById("animeEpisodes");
 const duration = document.getElementById("animeDuration");
 const score = document.getElementById("animeScore");
@@ -94,6 +95,24 @@ function renderDetail(anime) {
   if (episode) episode.textContent = anime.episodes || "?";
   if (score) score.textContent = anime.score || "N/A";
   if (duration) duration.textContent = anime.duration || "-";
+
+  // --- LOGIKA SINOPSIS ---
+  if (synopsis) {
+    if (
+      anime.synopsis &&
+      Array.isArray(anime.synopsis.paragraphs) &&
+      anime.synopsis.paragraphs.length > 0
+    ) {
+      const formattedSynopsis = anime.synopsis.paragraphs
+        .map((p) => `<p class="mb-2">${p}</p>`)
+        .join("");
+
+      synopsis.innerHTML = formattedSynopsis;
+    } else {
+      synopsis.innerHTML =
+        "<span class='italic opacity-50'>Sinopsis belum tersedia.</span>";
+    }
+  }
 
   const safeGenres = Array.isArray(anime.genreList) ? anime.genreList : [];
   if (genreList) {
