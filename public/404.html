@@ -68,52 +68,52 @@
     
     <div class="absolute inset-0 flex items-center justify-center select-none pointer-events-none z-0">
         <h1 style="
-    
-    font-size: clamp(8rem, 25vw, 20rem); 
-    font-weight: 900; 
-    line-height: 1; 
-    color: #8b5cf6; 
-    opacity: 0.1;
-    font-family: 'Arial Black', 'Inter', sans-serif;
-    letter-spacing: -5px; /* Sedikit dirapatkan agar padat */
-    
-    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
-    mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
-">
-    404
-</h1>
+            /* KEMBALI KE UKURAN BESAR */
+            font-size: clamp(8rem, 25vw, 20rem); 
+            font-weight: 900; 
+            line-height: 1; 
+            color: #8b5cf6; /* Ungu terang */
+            opacity: 0.12; /* Opacity sedikit dinaikkan agar terlihat jelas tapi tidak mengganggu */
+            font-family: 'Arial Black', 'Inter', sans-serif;
+            letter-spacing: -5px;
+            /* Masking gradient agar bagian bawah memudar */
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
+        ">
+            404
+        </h1>
     </div>
 
-    <div class="relative z-10 text-center max-w-3xl mx-auto space-y-6">
+    <div class="relative z-10 text-center max-w-2xl mx-auto space-y-6">
         
-        <div class="mb-4 inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 backdrop-blur-sm text-purple-400 text-xs font-bold tracking-widest uppercase shadow-xl shadow-purple-900/20">
+        <div class="mb-4 inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold tracking-widest uppercase shadow-lg shadow-purple-500/10">
             Page Not Found
         </div>
 
-        <h2 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight drop-shadow-2xl">
-            Kamu Tersesat? 
-            <span class="text-purple-500 block md:inline mt-2 md:mt-0">
-                Sepertinya kamu gagal masuk ke isekai.
+        <h2 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight drop-shadow-2xl leading-tight">
+            Sepertinya kamu gagal masuk ke isekai.  
+            <span class="text-purple-500 block md:inline mt-1 md:mt-0">
+                Kamu Tersesat?
             </span>
         </h2>
         
-        <p class="text-slate-400 text-lg md:text-xl leading-relaxed max-w-xl mx-auto">
-             Halaman yang kamu cari mungkin sudah dihapus atau dipindahkan ke dimensi lain.
+        <p class="text-slate-400 text-base md:text-lg leading-relaxed max-w-xl mx-auto">
+            Halaman yang kamu cari mungkin sudah dihapus atau dipindahkan ke dimensi lain.
         </p>
 
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
-            <a href="index.html" class="w-full sm:w-auto px-8 py-3.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-full transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(147,51,234,0.5)] flex items-center justify-center gap-2">
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
+            <a href="index.html" class="w-full sm:w-auto px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-full transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(147,51,234,0.5)] flex items-center justify-center gap-2 text-sm md:text-base">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                Kembali  ke Home
+                Kembali ke Beranda
             </a>
             
-            <button onclick="history.back()" class="cursor-pointer w-full sm:w-auto px-1 py-3.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium rounded-full transition-all hover:scale-105 flex items-center justify-center gap-2">
+            <button onclick="history.back()" class="cursor-pointer w-full sm:w-auto px-1.5 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium rounded-full transition-all hover:scale-105 flex items-center justify-center gap-2 text-sm md:text-base">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Kembali Aja Deh
             </button>
         </div>
 
-        <div class="mt-8 pt-12 opacity-30 hover:opacity-100 transition-opacity">
+        <div class="pt-8 opacity-30 hover:opacity-100 transition-opacity">
             <p class="font-mono text-[10px] text-slate-500 uppercase tracking-widest">
                 ERROR_CODE: 404_GAGAL_MASUK_ISEKAI
             </p>
