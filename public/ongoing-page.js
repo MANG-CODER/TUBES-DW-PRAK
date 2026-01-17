@@ -55,64 +55,209 @@ function getCache(key, maxAge = 1000 * 60 * 15) {
   return null;
 }
 
-// 3. SEARCH
-async function handleLiveSearch(query) {
-  const cleanQuery = query.trim();
+// ==========================
+// 3. LOGIKA PENCARIAN
+// ==========================
 
-  if (cleanQuery.length < 3) {
-    if (pageTitle) pageTitle.innerText = "🔥 Semua Ongoing Anime";
-    if (pagination) pagination.style.display = "flex";
-    getOngoing(1);
-    return;
-  }
+const searchDropdown = document.getElementById("searchResultsDropdown");
+let searchTimeout = null;
 
-  if (pageTitle)
-    pageTitle.innerHTML = `<span class="text-purple-400">🔍 Hasil:</span> "${cleanQuery}"`;
-  if (pagination) pagination.style.display = "none";
+if (searchInput) {
+  searchInput.addEventListener("input", (e) => {
+    const query = e.target.value.trim();
+    clearTimeout(searchTimeout);
 
-  const cacheKey = `search-${cleanQuery}`;
-  const cachedData = getCache(cacheKey, 1000 * 60 * 5);
-  if (cachedData) {
-    renderSearchResults(cachedData);
-    return;
-  }
+    if (query.length === 0) {
+      searchDropdown.classList.add("hidden");
+      resetPageToDefault();
+      return;
+    }
 
-  showLoadingUI(ongoingList);
+    searchDropdown.classList.remove("hidden");
+    renderLoadingSearch(query);
 
-  try {
-    const res = await fetch(`${SEARCH_API}${cleanQuery}`);
-    const json = await res.json();
-    setCache(cacheKey, json);
-    renderSearchResults(json);
-  } catch (e) {
-    console.error(e);
-    ongoingList.innerHTML = `<div class="col-span-full text-center text-red-400">Error search.</div>`;
-  }
-}
+    searchTimeout = setTimeout(() => {
+      performSearch(query);
+    }, 800);
+  });
 
-function renderSearchResults(json) {
-  const list = extractAnimeList(json);
-  if (ongoingList) ongoingList.innerHTML = "";
-  if (list.length > 0) {
-    list.forEach((anime) => renderCard(ongoingList, anime, "search"));
-  } else {
-    ongoingList.innerHTML = `<div class="col-span-full text-center text-slate-400">Tidak ditemukan.</div>`;
-  }
-}
-
-if (searchInput)
-  searchInput.addEventListener("keyup", (e) =>
-    handleLiveSearch(e.target.value)
-  );
-if (mobileSearchForm) {
-  mobileSearchForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    mobileSearchInput.blur();
-    handleLiveSearch(mobileSearchInput.value);
+  // Hide saat klik luar
+  document.addEventListener("click", (e) => {
+    if (!searchInput.contains(e.target) && !searchDropdown.contains(e.target)) {
+      searchDropdown.classList.add("hidden");
+    }
   });
 }
 
-// 4. HELPER & RENDER (DISESUAIKAN DENGAN HOME)
+// Helper: Reset Halaman ke Default
+function resetPageToDefault() {
+  if (pageTitle)
+    pageTitle.innerHTML = `<span class="w-2 h-8 bg-purple-600 rounded-full"></span> 🔥 Ongoing Anime`;
+
+  // Tampilkan kembali pagination
+  if (pagination) pagination.style.display = "flex";
+
+  getOngoing(1); // Load ulang data home default
+}
+
+// A. UI LOADING
+function renderLoadingSearch(query) {
+  searchDropdown.innerHTML = `
+        <div class="px-4 py-3 bg-slate-800 border-b border-slate-700">
+             <p class="text-xs text-slate-400 truncate">
+                Mencari: <span class="text-purple-400 font-bold">"${query}"</span>
+             </p>
+        </div>
+        
+        <div class="pt-4 h-60 flex flex-col items-center justify-center bg-slate-900">
+            <div class="h-8 w-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+            <p class="text-xs text-slate-500">Mencari Anime...</p>
+        </div>
+
+        <div class="bg-slate-800 border-t border-slate-700 p-2">
+            <div class="h-4 w-24 bg-slate-700 rounded mx-auto animate-pulse"></div>
+        </div>
+    `;
+}
+
+// B. FUNGSI FETCH
+async function performSearch(query) {
+  if (query.length < 3) return;
+
+  try {
+    const res = await fetch(`${SEARCH_API}${query}`);
+    const json = await res.json();
+    const list = extractAnimeList(json);
+
+    //Filter hanya yang statusnya Ongoing
+    const ongoingOnly = list.filter(
+      (anime) => anime.status && anime.status.toLowerCase().includes("ongoing"),
+    );
+
+    renderDropdownResults(ongoingOnly, query);
+  } catch (err) {
+    console.error(err);
+    searchDropdown.innerHTML = `<div class="p-4 text-center text-red-400 text-xs">Gagal memuat data.</div>`;
+  }
+}
+
+// C. UI HASIL DROPDOWN
+function renderDropdownResults(list, query) {
+  // HEADER
+  let htmlContent = `
+        <div class="flex justify-between items-center px-4 py-3 bg-slate-800 border-b border-slate-700">
+             <div class="flex-1 min-w-0 pr-2">
+                <p class="text-xs text-slate-400 truncate">
+                    Hasil: <span class="text-purple-400 font-bold">"${query}"</span>
+                </p>
+             </div>
+             <span class="text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full">${list.length}</span>
+        </div>
+        
+        <div style="max-height: 450px; overflow-y: auto;" class="custom-scrollbar bg-slate-900">
+    `;
+
+  if (list.length === 0) {
+    htmlContent += `
+            <div class="h-full flex flex-col items-center justify-center text-slate-500 opacity-50 py-10">
+                <span class="text-2xl mb-2">ternyata kosong 🗿</span>
+                <p class="text-xs">Tidak ada anime ongoing ditemukan.</p>
+            </div>
+        </div>`;
+  } else {
+    // LIST ITEM (Tampilkan max 20)
+    list.slice(0, 20).forEach((anime) => {
+      const slug = anime.animeId || anime.href?.split("/").pop() || "#";
+      const poster = anime.poster || "https://via.placeholder.com/100x140";
+      const title = anime.title || "No Title";
+      const rating = anime.score ? `⭐ ${anime.score}` : "";
+      const status = anime.status || "Unknown";
+
+      htmlContent += `
+                <a href="detail.html?slug=${slug}" class="group flex gap-3 p-3 hover:bg-slate-800 transition-colors border-slate-800/50 w-full relative">
+                    
+                    <div class="flex-shrink-0 w-12 h-16 rounded overflow-hidden bg-slate-800">
+                        <img src="${poster}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" alt="${title}">
+                    </div>
+                    
+                    <div class="flex-1 min-w-0 flex flex-col justify-center">
+                        
+                        <h4 class="text-sm font-bold text-slate-200 truncate group-hover:text-purple-400 transition-colors">
+                            ${title}
+                        </h4>
+                        
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-[10px] text-yellow-400 font-bold">${rating}</span>
+                            <span class="text-[10px] text-white px-2 bg-purple-500 border rounded-full border-slate-700 rounded">${status}</span>
+                        </div>
+                    </div>
+                </a>
+            `;
+    });
+    htmlContent += `</div>`; // Tutup div Body
+  }
+
+  // FOOTER (Klik memanggil fungsi showPageResults)
+  htmlContent += `
+        <div class="block text-center py-4 bg-slate-800 hover:bg-purple-600 text-xs font-bold text-slate-400 hover:text-white transition-colors border-t border-slate-700 cursor-pointer" onclick="showPageResults('${query}')">
+            LIHAT SEMUA HASIL
+        </div>
+    `;
+
+  searchDropdown.innerHTML = htmlContent;
+}
+
+// D. FUNGSI RENDER KE HALAMAN UTAMA
+async function showPageResults(query) {
+  // 1. Sembunyikan Dropdown
+  searchDropdown.classList.add("hidden");
+
+  // 2. Ubah Judul Halaman
+  if (pageTitle) {
+    pageTitle.innerHTML = `<span class="text-purple-400">🔍 Pencarian Ongoing:</span> "${query}"`;
+  }
+
+  // 3. Sembunyikan Pagination
+  if (pagination) {
+    pagination.style.display = "none";
+  }
+
+  // 4. Tampilkan Loading di Container Utama
+  showLoadingUI(ongoingList);
+
+  // 5. Fetch Ulang dan Render
+  try {
+    const res = await fetch(`${SEARCH_API}${query}`);
+    const json = await res.json();
+    const list = extractAnimeList(json);
+
+    // Filter Ongoing untuk tampilan halaman utama juga
+    const ongoingOnly = list.filter(
+      (anime) => anime.status && anime.status.toLowerCase().includes("ongoing"),
+    );
+
+    // Kosongkan container
+    if (ongoingList) ongoingList.innerHTML = "";
+
+    if (ongoingOnly.length > 0) {
+      // Render menggunakan generateCardHTML
+      const allCardsHTML = ongoingOnly
+        .map((anime) => generateCardHTML(anime, "ongoing"))
+        .join("");
+
+      ongoingList.innerHTML = allCardsHTML;
+    } else {
+      ongoingList.innerHTML = `<div class="col-span-full text-center text-slate-400 py-10">Tidak ditemukan anime ongoing dengan kata kunci "${query}".</div>`;
+    }
+  } catch (err) {
+    console.error(err);
+    ongoingList.innerHTML = `<div class="col-span-full text-center text-red-400 py-10">Terjadi kesalahan saat mencari.</div>`;
+  }
+}
+
+// ==========================
+// 4. HELPER & RENDER
+// ==========================
 function generateCardHTML(anime, type = "ongoing") {
   const slug =
     anime.animeId || (anime.href ? anime.href.split("/").pop() : "#");
@@ -128,7 +273,7 @@ function generateCardHTML(anime, type = "ongoing") {
   } else if (anime.episodes) {
     label = `<div class="absolute top-2 left-2 bg-purple-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md z-10">Ep ${anime.episodes}</div>`;
   } else {
-    label = `<div class="absolute top-2 left-2 bg-gray-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md z-10">Anime</div>`;
+    label = `<div class="absolute top-2 left-2 bg-purple-600 px-2 py-1 text-[10px] font-bold text-white rounded shadow-md z-10">Ongoing</div>`;
   }
 
   const dateInfo = anime.lastReleaseDate
@@ -170,7 +315,6 @@ async function getOngoing(page = 1) {
   const renderList = (dataList) => {
     if (ongoingList) {
       if (dataList.length > 0) {
-        // PANGGIL FUNGSI generateCardHTML YANG BARU DI ATAS
         const allCardsHTML = dataList
           .map((anime) => generateCardHTML(anime, "ongoing"))
           .join("");
