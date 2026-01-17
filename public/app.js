@@ -18,7 +18,7 @@ const COMPLETE_API = "https://www.sankavollerei.com/anime/complete-anime";
 const SEARCH_API = "https://www.sankavollerei.com/anime/search/";
 
 // ==========================
-// 2. FUNGSI LOADING KEREN (SERAGAM)
+// 2. FUNGSI LOADING KEREN
 // ==========================
 function showLoadingUI(container) {
   if (!container) return;
@@ -67,80 +67,177 @@ if (mobileBtn && mobileMenu) {
 }
 
 // ==========================
-// 5. LOGIKA PENCARIAN (LIVE SEARCH)
+// 5. LOGIKA PENCARIAN
 // ==========================
-async function handleLiveSearch(query) {
-  const cleanQuery = query.trim();
 
-  // A. KEMBALI KE DEFAULT
-  if (cleanQuery.length < 3) {
-    if (pageTitle)
-      pageTitle.innerHTML = `<span class="w-2 h-8 bg-purple-600 rounded-full"></span> 🔥 Ongoing Anime`;
-    // Tampilkan kembali section complete
-    if (completeList && completeList.parentElement) {
-      completeList.parentElement.style.display = "block";
-    }
-    // Load ulang data home (akan ambil dari cache jika ada)
-    getHomeData();
-    return;
-  }
+const searchDropdown = document.getElementById("searchResultsDropdown");
+let searchTimeout = null; 
 
-  // B. MODE SEARCH
-  if (pageTitle)
-    pageTitle.innerHTML = `<span class="text-purple-400">🔍 Hasil Pencarian:</span> "${cleanQuery}"`;
-  // Sembunyikan section complete saat search
-  if (completeList && completeList.parentElement) {
-    completeList.parentElement.style.display = "none";
-  }
-
-  // Cek Cache Search
-  const cacheKey = `search-${cleanQuery}`;
-  const cachedData = getCache(cacheKey, 1000 * 60 * 5); // Cache search 5 menit
-  if (cachedData) {
-    renderSearchResults(cachedData);
-    return;
-  }
-
-  // Tampilkan Loading
-  showLoadingUI(ongoingList);
-
-  try {
-    const res = await fetch(`${SEARCH_API}${cleanQuery}`);
-    const json = await res.json();
-
-    // Simpan Cache
-    setCache(cacheKey, json);
-
-    renderSearchResults(json);
-  } catch (err) {
-    console.error(err);
-    ongoingList.innerHTML = `<div class="col-span-full text-center text-red-400 py-10">Error saat mencari.</div>`;
-  }
-}
-
-function renderSearchResults(json) {
-  const list = extractAnimeList(json);
-  if (ongoingList) ongoingList.innerHTML = "";
-
-  if (list.length > 0) {
-    list.forEach((anime) => renderCard(ongoingList, anime, "search"));
-  } else {
-    ongoingList.innerHTML = `<div class="col-span-full text-center text-slate-400 py-10">Tidak ditemukan anime.</div>`;
-  }
-}
-
-// Event Listeners Search
 if (searchInput) {
-  searchInput.addEventListener("keyup", (e) =>
-    handleLiveSearch(e.target.value)
-  );
+    searchInput.addEventListener("input", (e) => {
+        const query = e.target.value.trim();
+        clearTimeout(searchTimeout); 
+        
+        if (query.length === 0) {
+            searchDropdown.classList.add("hidden");
+            resetPageToDefault();
+            return;
+        }
+
+        searchDropdown.classList.remove("hidden");
+        renderLoadingSearch(query);
+
+        searchTimeout = setTimeout(() => {
+            performSearch(query);
+        }, 800); 
+    });
+
+    // Hide saat klik luar
+    document.addEventListener("click", (e) => {
+        if (!searchInput.contains(e.target) && !searchDropdown.contains(e.target)) {
+            searchDropdown.classList.add("hidden");
+        }
+    });
 }
-if (mobileSearchForm) {
-  mobileSearchForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    mobileSearchInput.blur();
-    handleLiveSearch(mobileSearchInput.value);
-  });
+
+// A. UI LOADING
+function renderLoadingSearch(query) {
+    searchDropdown.innerHTML = `
+        <div class="px-4 py-3 bg-slate-800 border-b border-slate-700">
+             <p class="text-xs text-slate-400 truncate">
+                Mencari: <span class="text-purple-400 font-bold">"${query}"</span>
+             </p>
+        </div>
+        
+        <div class="pt-4 h-60 flex flex-col items-center justify-center bg-slate-900">
+            <div class="h-8 w-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+            <p class="text-xs text-slate-500">Mencari Anime...</p>
+        </div>
+
+        <div class="bg-slate-800 border-t border-slate-700 p-2">
+            <div class="h-4 w-24 bg-slate-700 rounded mx-auto animate-pulse"></div>
+        </div>
+    `;
+}
+
+// B. FUNGSI FETCH
+async function performSearch(query) {
+    if (query.length < 3) return; 
+
+    try {
+        const res = await fetch(`${SEARCH_API}${query}`);
+        const json = await res.json();
+        const list = extractAnimeList(json);
+        renderDropdownResults(list, query);
+    } catch (err) {
+        console.error(err);
+        searchDropdown.innerHTML = `<div class="p-4 text-center text-red-400 text-xs">Gagal memuat data.</div>`;
+    }
+}
+
+// C. UI HASIL
+function renderDropdownResults(list, query) {
+    // HEADER
+    let htmlContent = `
+        <div class="flex justify-between items-center px-4 py-3 bg-slate-800 border-b border-slate-700">
+             <div class="flex-1 min-w-0 pr-2">
+                <p class="text-xs text-slate-400 truncate">
+                    Hasil: <span class="text-purple-400 font-bold">"${query}"</span>
+                </p>
+             </div>
+             <span class="text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full">${list.length}</span>
+        </div>
+        
+        <div style="max-height: 450px; overflow-y: auto;" class="custom-scrollbar bg-slate-900">
+    `;
+
+    if (list.length === 0) {
+        htmlContent += `
+            <div class="h-full flex flex-col items-center justify-center text-slate-500 opacity-50">
+                <span class="text-2xl mb-2">ternyata kosong 🗿</span>
+                <p class="text-xs">Anime tidak ditemukan.</p>
+            </div>
+        </div>`;
+    } else {
+      // LIST ITEM
+      list.slice(0, 50).forEach((anime) => {
+        const slug = anime.animeId || anime.href?.split("/").pop() || "#";
+        const poster = anime.poster || "https://via.placeholder.com/100x140";
+        const title = anime.title || "No Title";
+        const rating = anime.score ? `⭐ ${anime.score}` : "";
+        const status = anime.status || "Unknown";
+
+        htmlContent += `
+                <a href="detail.html?slug=${slug}" class="group flex gap-3 p-3 hover:bg-slate-800 transition-colors border-slate-800/50 w-full relative">
+                    
+                    <div class="flex-shrink-0 w-12 h-16 rounded overflow-hidden bg-slate-800">
+                        <img src="${poster}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" alt="${title}">
+                    </div>
+                    
+                    <div class="flex-1 min-w-0 flex flex-col justify-center">
+                        
+                        <h4 class="text-sm font-bold text-slate-200 truncate group-hover:text-purple-400 transition-colors">
+                            ${title}
+                        </h4>
+                        
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-[10px] text-yellow-400 font-bold">${rating}</span>
+                            <span class="text-[10px] text-white px-2 bg-purple-500 border rounded-full border-slate-700 rounded">${status}</span>
+                        </div>
+                    </div>
+                </a>
+            `;
+      });
+      htmlContent += `</div>`; // Tutup div Body
+    }
+
+    // FOOTER
+    htmlContent += `
+        <div class="block text-center py-4 bg-slate-800 hover:bg-purple-600 text-xs font-bold text-slate-400 hover:text-white transition-colors border-t border-slate-700" onclick="showPageResults('${query}')">
+            LIHAT SEMUA HASIL
+        </div>
+    `;
+
+    searchDropdown.innerHTML = htmlContent;
+}
+
+// D. FUNGSI RENDER KE HALAMAN UTAMA
+async function showPageResults(query) {
+    // 1. Sembunyikan Dropdown
+    searchDropdown.classList.add("hidden");
+
+    // 2. Ubah Judul Halaman
+    if (pageTitle) {
+        pageTitle.innerHTML = `<span class="text-purple-400">🔍 Hasil Pencarian:</span> "${query}"`;
+    }
+
+    // 3. Sembunyikan Section "Complete Anime"
+    if (completeList && completeList.parentElement) {
+        completeList.parentElement.style.display = "none";
+    }
+
+    // 4. Tampilkan Loading di Container Utama (Ongoing List)
+    showLoadingUI(ongoingList);
+
+    // 5. Fetch Ulang
+    try {
+        const res = await fetch(`${SEARCH_API}${query}`);
+        const json = await res.json();
+        const list = extractAnimeList(json);
+
+        // Kosongkan container
+        if (ongoingList) ongoingList.innerHTML = "";
+
+        if (list.length > 0) {
+            // Render Grid Card
+            list.forEach((anime) => renderCard(ongoingList, anime, "search"));
+        } else {
+            ongoingList.innerHTML = `<div class="col-span-full text-center text-slate-400 py-10">Tidak ditemukan anime dengan kata kunci "${query}".</div>`;
+        }
+    } catch (err) {
+        console.error(err);
+        ongoingList.innerHTML = `<div class="col-span-full text-center text-red-400 py-10">Terjadi kesalahan saat mencari.</div>`;
+    }
 }
 
 // ==========================
@@ -195,7 +292,7 @@ function renderCard(container, anime, type = "ongoing") {
 }
 
 // ==========================
-// 7. LOAD HOME DATA (DENGAN CACHE)
+// 7. LOAD HOME DATA
 // ==========================
 async function getHomeData() {
   // Cek apakah data sudah tampil di layar (DOM Check) agar tidak flicker saat kembali dari search
@@ -271,7 +368,7 @@ let slideInterval;
 async function initHeroCarousel() {
   if (!heroCarousel) return;
 
-  // Coba ambil dari Cache Ongoing dulu untuk Hero (biar cepat)
+  // Coba ambil dari Cache Ongoing dulu untuk Hero
   const cachedOngoing = getCache("home-ongoing");
 
   if (cachedOngoing && cachedOngoing.length > 0) {
@@ -281,7 +378,7 @@ async function initHeroCarousel() {
     return;
   }
 
-  // Jika tidak ada cache, fetch ulang (tanpa loader HTML, biarkan default HTML loader)
+  // Jika tidak ada cache, fetch ulang
   try {
     const res = await fetch(`${ONGOING_API}?page=1`);
     const json = await res.json();

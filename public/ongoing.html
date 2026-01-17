@@ -28,10 +28,16 @@
         </div>
 
         <div class="relative hidden md:block">
-          <input id="searchInput" type="text" placeholder="Cari anime..." 
-            class="bg-slate-800 text-sm rounded-full pl-10 pr-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all border border-slate-700 placeholder-slate-500">
-          <svg class="absolute left-3 top-2.5 h-4 w-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        </div>
+    <input id="searchInput" type="text" placeholder="Cari anime..." autocomplete="off"
+        class="bg-slate-800 text-sm rounded-full pl-10 pr-4 py-2 w-64 focus:w-80 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 border border-slate-700 placeholder-slate-500 text-slate-200">
+    
+    <svg class="absolute left-3 top-2.5 h-4 w-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+    </svg>
+
+   <div id="searchResultsDropdown" 
+     class="hidden absolute top-14 right-0 w-80 md:w-96 bg-[#1e293b] border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-[100]">
+    </div>
 
         <div class="md:hidden">
             <button id="mobile-menu-btn" class="text-slate-300 hover:text-white focus:outline-none">
