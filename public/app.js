@@ -100,6 +100,23 @@ if (searchInput) {
     });
 }
 
+// FUNGSI RESET HALAMAN KE DEFAULT
+function resetPageToDefault() {
+    // 1. Kembalikan Judul Halaman
+    if (pageTitle) {
+        pageTitle.innerHTML = `<span class="w-2 h-8 bg-purple-600 rounded-full"></span> 🔥 Ongoing Anime`;
+    }
+
+    // 2. Tampilkan kembali section "Complete List" (jika sebelumnya disembunyikan)
+    if (completeList && completeList.parentElement) {
+        completeList.parentElement.style.display = "block"; // atau "grid" tergantung layout CSS asli container parent-nya
+    }
+
+    // 3. Muat ulang data Home (Ongoing & Complete)
+    // Karena pakai sistem cache, ini akan instan (tidak loading lama)
+    getHomeData();
+}
+
 // A. UI LOADING
 function renderLoadingSearch(query) {
     searchDropdown.innerHTML = `
