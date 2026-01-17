@@ -5,6 +5,8 @@ const ongoingList = document.getElementById("ongoingList");
 const completeList = document.getElementById("completeList");
 const searchInput = document.getElementById("searchInput");
 const pageTitle = document.getElementById("pageTitle");
+
+// [BARU] Tombol Lihat Semua (Pastikan ada id="ongoingViewAllBtn" di HTML)
 const ongoingViewAllBtn = document.getElementById("ongoingViewAllBtn");
 
 // Mobile Elements
@@ -115,11 +117,11 @@ function resetPageToDefault() {
 
   // 3. Munculkan kembali Tombol Lihat Semua (Ongoing)
   if (ongoingViewAllBtn) {
-    ongoingViewAllBtn.style.display = "inline-flex";
+    ongoingViewAllBtn.style.display = "inline-flex"; // Kembalikan tombol
   }
 
-  // 4. Load Ulang Data Home
-  getHomeData(true); // true = paksa load ulang render
+  // 4. Load Ulang Data Home (PAKSA / FORCE)
+  getHomeData(true);
 }
 
 // A. UI LOADING SEARCH
@@ -180,7 +182,6 @@ function renderDropdownResults(list, query) {
       const rating = anime.score ? `⭐ ${anime.score}` : "";
       const status = anime.status || "Unknown";
 
-      // Status Color Logic
       let statusColor = "bg-gray-600";
       if (status.toLowerCase().includes("ongoing"))
         statusColor = "bg-purple-600";
@@ -204,7 +205,7 @@ function renderDropdownResults(list, query) {
     htmlContent += `</div>`;
   }
 
-  // FOOTER: Lihat Semua
+  // FOOTER (DENGAN TOMBOL LIHAT SEMUA)
   htmlContent += `
         <div class="block text-center py-4 bg-slate-800 hover:bg-purple-600 text-xs font-bold text-slate-400 hover:text-white transition-colors border-t border-slate-700 cursor-pointer" onclick="showPageResults('${query}')">
             LIHAT SEMUA HASIL
@@ -229,7 +230,7 @@ async function showPageResults(query) {
     completeList.parentElement.style.display = "none";
   }
   if (ongoingViewAllBtn) {
-    ongoingViewAllBtn.style.display = "none";
+    ongoingViewAllBtn.style.display = "none"; // Sembunyikan tombol saat search aktif
   }
 
   // 4. Tampilkan Loading di Container Utama (Ongoing List)
@@ -310,11 +311,10 @@ function renderCard(container, anime, type = "ongoing") {
 }
 
 // ==========================
-// 7. LOAD HOME DATA
+// 7. LOAD HOME DATA (FIXED)
 // ==========================
 async function getHomeData(force = false) {
-  // PERBAIKAN: Hapus check "children.length > 1" jika dipaksa (force = true)
-  // Ini agar saat reset search, konten bisa dirender ulang.
+  // [FIX] Jika dipaksa (force = true), abaikan pengecekan children
   if (
     !force &&
     ongoingList.children.length > 1 &&
@@ -322,7 +322,7 @@ async function getHomeData(force = false) {
   )
     return;
 
-  // Jika dipaksa (saat reset search), kosongkan dulu container
+  // Jika dipaksa, bersihkan container agar data lama/hasil search hilang
   if (force) {
     ongoingList.innerHTML = "";
     if (completeList) completeList.innerHTML = "";
