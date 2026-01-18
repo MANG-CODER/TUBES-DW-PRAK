@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <title>MangNime</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="./output.css" rel="stylesheet">
+  <link href="../src/output.css" rel="stylesheet">
   <link rel="icon" type="image/png" href="./img/Icon MangNime.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@waline/client@v3/dist/waline.css" />
 </head>
 <body class="bg-[#0f172a] text-slate-200 font-['Inter'] antialiased">
 
@@ -130,6 +131,20 @@
         }
     });
   </script>
+
+  <section class="w-full max-w-6xl mx-auto mt-12 px-4 mb-20">
+    <div class="flex items-center gap-3 mb-6 border-gray-700 pb-4">
+        <div class="w-1 h-8 bg-blue-500 rounded-full"></div>
+        <h2 class="text-2xl font-bold text-white">Diskusi & Komentar</h2>
+        <span class="text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded-md border border-gray-700">Anonim</span>
+    </div>
+
+    <div class= "p-4 md:p-6 rounded-2xl border border-slate-800 shadow-xl">
+        <div id="waline"></div>
+    </div>
+</section>
+
+<script type="module" src="./waline-comment.js"></script>
 <footer class="bg-slate-900 border-t border-slate-800 mt-10 pt-10 pb-8">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     
