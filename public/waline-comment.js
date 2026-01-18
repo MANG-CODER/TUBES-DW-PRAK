@@ -3,21 +3,25 @@ import { init } from "https://unpkg.com/@waline/client@v3/dist/waline.js";
 
 // Fungsi untuk memuat komentar
 export function loadComments() {
-  init({
-    el: "#waline", // ID dari div di HTML
+  // 1. Ambil slug dari URL browser
+  const params = new URLSearchParams(window.location.search);
+  const currentSlug = params.get("slug");
 
+  init({
+    el: "#waline",
     serverURL: "https://mangnimecomments.vercel.app/",
 
-    // Konfigurasi Tampilan MangNime
-    lang: "id", // Bahasa Indonesia
-    dark: true, // Mode gelap permanen
-    login: "disable", // User tidak wajib login
-    meta: ["nick", "mail"], // Data yang diminta
-    requiredMeta: [], // Tidak ada data yang wajib diisi
+    // 2. Perintah memisahkan komentar berdasarkan slug
+    path: currentSlug ? `/anime/${currentSlug}` : window.location.pathname,
 
-    // Fitur Tambahan
-    search: true, // pencarian GIF
-    reaction: true, // Menyalakan reaksi emoji
+    // Konfigurasi lainnya sama
+    lang: "id",
+    dark: true,
+    login: "disable",
+    meta: ["nick", "mail"],
+    requiredMeta: [],
+    search: true,
+    reaction: true,
     emoji: [
       "https://unpkg.com/@waline/emojis@1.2.0/bilibili",
       "https://unpkg.com/@waline/emojis@1.2.0/weibo",
@@ -26,5 +30,4 @@ export function loadComments() {
   });
 }
 
-// Jalankan fungsi
 loadComments();
