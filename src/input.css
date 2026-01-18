@@ -38,3 +38,8 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
+
+:root {
+  --waline-theme-color: #9333ea !important;
+  --waline-active-color: #7e22ce !important;
+}
