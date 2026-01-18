@@ -30,7 +30,6 @@
       </div>
 
       <div class="relative hidden md:block">
-          
           <input id="searchInput" type="text" placeholder="Cari anime..." autocomplete="off"
               class="bg-slate-800 text-sm rounded-full pl-10 pr-4 py-2 w-64 focus:w-80 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 border border-slate-700 placeholder-slate-500 text-slate-200">
           
@@ -40,10 +39,8 @@
 
           <div id="searchResultsDropdown" 
                class="hidden absolute top-full right-0 mt-2 w-80 md:w-96 bg-[#1e293b] border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-[100]">
-               </div>
-      </div>
-
-      <div class="md:hidden">
+          </div>
+      </div> <div class="md:hidden">
           <button id="mobile-menu-btn" class="p-2 text-slate-400 hover:text-white focus:outline-none">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
@@ -52,6 +49,32 @@
       </div>
 
     </div>
+  </div>
+
+  <div id="mobile-menu" class="hidden md:hidden bg-slate-900 border-t border-slate-800 absolute w-full left-0 top-16 z-50">
+      <div class="px-4 pt-4 pb-4 space-y-3 flex flex-col shadow-2xl">
+          <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800">Home</a>
+          <a href="ongoing.html" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800">Ongoing</a>
+          <a href="complete.html" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800">Complete</a>
+          <a href="genre.html" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800">Genre</a>
+          
+          <form id="mobileSearchForm" class="pt-2 pb-2 flex gap-2 relative">
+              <input 
+                  id="mobileSearchInput" 
+                  type="search" 
+                  enterkeyhint="search"
+                  placeholder="Cari anime..." 
+                  class="flex-1 bg-slate-800 text-sm rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 border border-slate-700 placeholder-slate-500 text-white"
+              >
+              <button id="mobileSearchBtn" class="bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-lg transition-colors">
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              </button>
+
+              <div id="mobileSearchResultsDropdown" 
+                   class="hidden absolute top-full mt-2 left-0 w-full bg-[#1e293b] border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-[100]">
+              </div>
+          </form>
+      </div>
   </div>
 </nav>
 

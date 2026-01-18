@@ -69,64 +69,76 @@ if (mobileBtn && mobileMenu) {
 }
 
 // ==========================
-// 5. LOGIKA PENCARIAN
+// 5. LOGIKA PENCARIAN (LENGKAP & REUSABLE)
 // ==========================
 
-const searchDropdown = document.getElementById("searchResultsDropdown");
-let searchTimeout = null;
+// A. FUNGSI UTAMA: Setup Search untuk Desktop & Mobile
+function initSearch(inputId, dropdownId) {
+    const inputEl = document.getElementById(inputId);
+    const dropdownEl = document.getElementById(dropdownId);
+    let searchTimeout = null;
 
-if (searchInput) {
-  searchInput.addEventListener("input", (e) => {
-    const query = e.target.value.trim();
-    clearTimeout(searchTimeout);
+    if (!inputEl || !dropdownEl) return;
 
-    // 1. Jika input kosong, reset ke default
-    if (query.length === 0) {
-      searchDropdown.classList.add("hidden");
-      resetPageToDefault(); // Panggil fungsi reset
-      return;
-    }
+    inputEl.addEventListener("input", (e) => {
+        const query = e.target.value.trim();
+        clearTimeout(searchTimeout);
 
-    searchDropdown.classList.remove("hidden");
-    renderLoadingSearch(query);
+        // 1. Jika input kosong, sembunyikan dropdown & RESET HALAMAN
+        if (query.length === 0) {
+            dropdownEl.classList.add("hidden");
+            resetPageToDefault(); // <<-- INI FUNGSI PENTINGNYA
+            return;
+        }
 
-    searchTimeout = setTimeout(() => {
-      performSearch(query);
-    }, 800);
-  });
+        // 2. Munculkan dropdown & Loading UI
+        dropdownEl.classList.remove("hidden");
+        renderLoadingSearch(dropdownEl, query);
 
-  // Hide saat klik luar
-  document.addEventListener("click", (e) => {
-    if (!searchInput.contains(e.target) && !searchDropdown.contains(e.target)) {
-      searchDropdown.classList.add("hidden");
-    }
-  });
+        // 3. Debounce fetch
+        searchTimeout = setTimeout(() => {
+            performSearch(query, dropdownEl);
+        }, 800);
+    });
+
+    // Hide saat klik luar
+    document.addEventListener("click", (e) => {
+        if (!inputEl.contains(e.target) && !dropdownEl.contains(e.target)) {
+            dropdownEl.classList.add("hidden");
+        }
+    });
 }
 
-// [PENTING] Fungsi Reset Halaman
+// === AKTIFKAN PENCARIAN ===
+initSearch("searchInput", "searchResultsDropdown");        // Desktop
+initSearch("mobileSearchInput", "mobileSearchResultsDropdown"); // Mobile
+
+
+// B. FUNGSI RESET (MENGEMBALIKAN TAMPILAN HOME)
 function resetPageToDefault() {
-  // 1. Reset Judul
-  if (pageTitle) {
-    pageTitle.innerHTML = `<span class="w-2 h-8 bg-purple-600 rounded-full"></span> 🔥 Ongoing Anime`;
-  }
+    // 1. Reset Judul Halaman
+    if (pageTitle) {
+        pageTitle.innerHTML = `<span class="w-2 h-8 bg-purple-600 rounded-full"></span> 🔥 Ongoing Anime`;
+    }
 
-  // 2. Munculkan kembali Section Complete
-  if (completeList && completeList.parentElement) {
-    completeList.parentElement.style.display = "block";
-  }
+    // 2. Munculkan kembali Section Complete
+    if (completeList && completeList.parentElement) {
+        completeList.parentElement.style.display = "block";
+    }
 
-  // 3. Munculkan kembali Tombol Lihat Semua (Ongoing)
-  if (ongoingViewAllBtn) {
-    ongoingViewAllBtn.style.display = "inline-flex"; // Kembalikan tombol
-  }
+    // 3. Munculkan kembali Tombol Lihat Semua
+    if (ongoingViewAllBtn) {
+        ongoingViewAllBtn.style.display = "inline-flex";
+    }
 
-  // 4. Load Ulang Data Home (PAKSA / FORCE)
-  getHomeData(true);
+    // 4. Load Ulang Data Home (Ongoing & Complete) secara paksa
+    getHomeData(true);
 }
 
-// A. UI LOADING SEARCH
-function renderLoadingSearch(query) {
-  searchDropdown.innerHTML = `
+
+// C. FUNGSI UI LOADING
+function renderLoadingSearch(container, query) {
+    container.innerHTML = `
         <div class="px-4 py-3 bg-slate-800 border-b border-slate-700">
              <p class="text-xs text-slate-400 truncate">
                 Mencari: <span class="text-purple-400 font-bold">"${query}"</span>
@@ -139,23 +151,23 @@ function renderLoadingSearch(query) {
     `;
 }
 
-// B. FUNGSI FETCH SEARCH
-async function performSearch(query) {
-  if (query.length < 3) return;
-  try {
-    const res = await fetch(`${SEARCH_API}${query}`);
-    const json = await res.json();
-    const list = extractAnimeList(json);
-    renderDropdownResults(list, query);
-  } catch (err) {
-    console.error(err);
-    searchDropdown.innerHTML = `<div class="p-4 text-center text-red-400 text-xs">Gagal memuat data.</div>`;
-  }
+// D. FUNGSI FETCH DATA
+async function performSearch(query, container) {
+    if (query.length < 3) return;
+    try {
+        const res = await fetch(`${SEARCH_API}${query}`);
+        const json = await res.json();
+        const list = extractAnimeList(json);
+        renderDropdownResults(list, query, container);
+    } catch (err) {
+        console.error(err);
+        container.innerHTML = `<div class="p-4 text-center text-red-400 text-xs">Gagal memuat data.</div>`;
+    }
 }
 
-// C. UI HASIL SEARCH DROPDOWN
-function renderDropdownResults(list, query) {
-  let htmlContent = `
+// E. FUNGSI RENDER HASIL DROPDOWN
+function renderDropdownResults(list, query, container) {
+    let htmlContent = `
         <div class="flex justify-between items-center px-4 py-3 bg-slate-800 border-b border-slate-700">
              <div class="flex-1 min-w-0 pr-2">
                 <p class="text-xs text-slate-400 truncate">
@@ -167,28 +179,26 @@ function renderDropdownResults(list, query) {
         <div style="max-height: 450px; overflow-y: auto;" class="custom-scrollbar bg-slate-900">
     `;
 
-  if (list.length === 0) {
-    htmlContent += `
+    if (list.length === 0) {
+        htmlContent += `
             <div class="h-full flex flex-col items-center justify-center text-slate-500 opacity-50 py-10">
                 <span class="text-2xl mb-2">ternyata kosong 🗿</span>
                 <p class="text-xs">Anime tidak ditemukan.</p>
             </div>
         </div>`;
-  } else {
-    list.slice(0, 50).forEach((anime) => {
-      const slug = anime.animeId || anime.href?.split("/").pop() || "#";
-      const poster = anime.poster || "https://via.placeholder.com/100x140";
-      const title = anime.title || "No Title";
-      const rating = anime.score ? `⭐ ${anime.score}` : "";
-      const status = anime.status || "Unknown";
+    } else {
+        list.slice(0, 50).forEach((anime) => {
+            const slug = anime.animeId || anime.href?.split("/").pop() || "#";
+            const poster = anime.poster || "https://via.placeholder.com/100x140";
+            const title = anime.title || "No Title";
+            const rating = anime.score ? `⭐ ${anime.score}` : "";
+            const status = anime.status || "Unknown";
 
-      let statusColor = "bg-gray-600";
-      if (status.toLowerCase().includes("ongoing"))
-        statusColor = "bg-purple-600";
-      else if (status.toLowerCase().includes("completed"))
-        statusColor = "bg-green-600";
+            let statusColor = "bg-gray-600";
+            if (status.toLowerCase().includes("ongoing")) statusColor = "bg-purple-600";
+            else if (status.toLowerCase().includes("completed")) statusColor = "bg-green-600";
 
-      htmlContent += `
+            htmlContent += `
                 <a href="detail.html?slug=${slug}" class="group flex gap-3 p-3 hover:bg-slate-800 transition-colors border-slate-800/50 w-full relative">
                     <div class="flex-shrink-0 w-12 h-16 rounded overflow-hidden bg-slate-800">
                         <img src="${poster}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" alt="${title}">
@@ -201,62 +211,61 @@ function renderDropdownResults(list, query) {
                         </div>
                     </div>
                 </a>`;
-    });
-    htmlContent += `</div>`;
-  }
+        });
+        htmlContent += `</div>`;
+    }
 
-  // FOOTER (DENGAN TOMBOL LIHAT SEMUA)
-  htmlContent += `
-        <div class="block text-center py-4 bg-slate-800 hover:bg-purple-600 text-xs font-bold text-slate-400 hover:text-white transition-colors border-t border-slate-700 cursor-pointer" onclick="showPageResults('${query}')">
+    const containerId = container.id;
+    htmlContent += `
+        <div class="block text-center py-4 bg-slate-800 hover:bg-purple-600 text-xs font-bold text-slate-400 hover:text-white transition-colors border-t border-slate-700 cursor-pointer" 
+             onclick="showPageResults('${query}', '${containerId}')">
             LIHAT SEMUA HASIL
         </div>
     `;
 
-  searchDropdown.innerHTML = htmlContent;
+    container.innerHTML = htmlContent;
 }
 
-// D. FUNGSI RENDER KE HALAMAN UTAMA
-async function showPageResults(query) {
-  // 1. Sembunyikan Dropdown
-  searchDropdown.classList.add("hidden");
-
-  // 2. Ubah Judul Halaman
-  if (pageTitle) {
-    pageTitle.innerHTML = `<span class="text-purple-400">🔍 Hasil Pencarian:</span> "${query}"`;
-  }
-
-  // 3. Sembunyikan Section "Complete Anime" & Tombol Lihat Semua
-  if (completeList && completeList.parentElement) {
-    completeList.parentElement.style.display = "none";
-  }
-  if (ongoingViewAllBtn) {
-    ongoingViewAllBtn.style.display = "none"; // Sembunyikan tombol saat search aktif
-  }
-
-  // 4. Tampilkan Loading di Container Utama (Ongoing List)
-  showLoadingUI(ongoingList);
-
-  // 5. Fetch Ulang
-  try {
-    const res = await fetch(`${SEARCH_API}${query}`);
-    const json = await res.json();
-    const list = extractAnimeList(json);
-
-    // Kosongkan container
-    if (ongoingList) ongoingList.innerHTML = "";
-
-    if (list.length > 0) {
-      // Render Grid Card
-      list.forEach((anime) => renderCard(ongoingList, anime, "search"));
+// F. FUNGSI MENAMPILKAN HASIL PENCARIAN KE HALAMAN UTAMA
+async function showPageResults(query, dropdownIdToClose) {
+    if (dropdownIdToClose) {
+        const el = document.getElementById(dropdownIdToClose);
+        if (el) el.classList.add("hidden");
     } else {
-      ongoingList.innerHTML = `<div class="col-span-full text-center text-slate-400 py-10">Tidak ditemukan anime dengan kata kunci "${query}".</div>`;
+        const desktopDropdown = document.getElementById("searchResultsDropdown");
+        if(desktopDropdown) desktopDropdown.classList.add("hidden");
     }
-  } catch (err) {
-    console.error(err);
-    ongoingList.innerHTML = `<div class="col-span-full text-center text-red-400 py-10">Terjadi kesalahan saat mencari.</div>`;
-  }
-}
 
+    if (pageTitle) {
+        pageTitle.innerHTML = `<span class="text-purple-400">🔍 Hasil Pencarian:</span> "${query}"`;
+    }
+
+    if (completeList && completeList.parentElement) {
+        completeList.parentElement.style.display = "none";
+    }
+    if (ongoingViewAllBtn) {
+        ongoingViewAllBtn.style.display = "none";
+    }
+
+    showLoadingUI(ongoingList);
+
+    try {
+        const res = await fetch(`${SEARCH_API}${query}`);
+        const json = await res.json();
+        const list = extractAnimeList(json);
+
+        if (ongoingList) ongoingList.innerHTML = "";
+
+        if (list.length > 0) {
+            list.forEach((anime) => renderCard(ongoingList, anime, "search"));
+        } else {
+            ongoingList.innerHTML = `<div class="col-span-full text-center text-slate-400 py-10">Tidak ditemukan anime dengan kata kunci "${query}".</div>`;
+        }
+    } catch (err) {
+        console.error(err);
+        ongoingList.innerHTML = `<div class="col-span-full text-center text-red-400 py-10">Terjadi kesalahan saat mencari.</div>`;
+    }
+}
 // ==========================
 // 6. HELPER & RENDER
 // ==========================

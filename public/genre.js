@@ -10,14 +10,8 @@ const filterSection = document.getElementById("filterSection");
 const pageTitle = document.getElementById("pageTitle");
 const pageDesc = document.getElementById("pageDesc");
 
-// Variabel Search
-const searchInput = document.getElementById("searchInput");
-const searchDropdown = document.getElementById("searchResultsDropdown");
-const mobileSearchForm = document.getElementById("mobileSearchForm");
-const mobileSearchInput = document.getElementById("mobileSearchInput");
 const mobileBtn = document.getElementById("mobile-menu-btn");
 const mobileMenu = document.getElementById("mobile-menu");
-let searchTimeout = null;
 
 let globalGenreList = [];
 const colors = [
@@ -47,14 +41,16 @@ function showLoadingUI(container) {
   `;
 }
 
-// NAVIGASI MOBILE
+// 1. NAVIGASI MOBILE
 if (mobileBtn && mobileMenu) {
   mobileBtn.addEventListener("click", () => {
     mobileMenu.classList.toggle("hidden");
   });
 }
 
-// CACHE HELPER
+// ==========================
+// 2. CACHE HELPER
+// ==========================
 function setCache(key, data) {
   try {
     localStorage.setItem(key, JSON.stringify({ time: Date.now(), data }));
@@ -69,47 +65,53 @@ function getCache(key, maxAge = 1000 * 60 * 60 * 24) {
 }
 
 // ==========================
-// 1. LOGIKA SEARCH DROPDOWN
+// 3. LOGIKA SEARCH NAVBAR (REUSABLE)
 // ==========================
-if (searchInput) {
-  searchInput.addEventListener("input", (e) => {
+
+// A. Init Search (Desktop & Mobile)
+function initSearch(inputId, dropdownId) {
+  const inputEl = document.getElementById(inputId);
+  const dropdownEl = document.getElementById(dropdownId);
+  let searchTimeout = null;
+
+  if (!inputEl || !dropdownEl) return;
+
+  inputEl.addEventListener("input", (e) => {
     const query = e.target.value.trim();
     clearTimeout(searchTimeout);
 
-    // 1. Reset jika kosong -> Kembali ke tampilan Genre
+    // 1. Jika kosong, kembalikan ke tampilan Genre List
     if (query.length === 0) {
-      if (searchDropdown) searchDropdown.classList.add("hidden");
+      dropdownEl.classList.add("hidden");
       resetToGenreList();
       return;
     }
 
     // 2. Loading Dropdown
-    if (searchDropdown) {
-      searchDropdown.classList.remove("hidden");
-      renderLoadingSearch(query);
-    }
+    dropdownEl.classList.remove("hidden");
+    renderLoadingSearch(dropdownEl, query);
 
-    // 3. Debounce
+    // 3. Debounce Fetch
     searchTimeout = setTimeout(() => {
-      performSearch(query);
+      performSearch(query, dropdownEl);
     }, 800);
   });
 
   // Hide klik luar
   document.addEventListener("click", (e) => {
-    if (
-      searchDropdown &&
-      !searchInput.contains(e.target) &&
-      !searchDropdown.contains(e.target)
-    ) {
-      searchDropdown.classList.add("hidden");
+    if (!inputEl.contains(e.target) && !dropdownEl.contains(e.target)) {
+      dropdownEl.classList.add("hidden");
     }
   });
 }
 
-function renderLoadingSearch(query) {
-  if (!searchDropdown) return;
-  searchDropdown.innerHTML = `
+// Aktifkan Search
+initSearch("searchInput", "searchResultsDropdown");
+initSearch("mobileSearchInput", "mobileSearchResultsDropdown");
+
+// B. Render Loading Dropdown
+function renderLoadingSearch(container, query) {
+  container.innerHTML = `
         <div class="px-4 py-3 bg-slate-800 border-b border-slate-700">
              <p class="text-xs text-slate-400 truncate">
                 Mencari: <span class="text-purple-400 font-bold">"${query}"</span>
@@ -119,31 +121,25 @@ function renderLoadingSearch(query) {
             <div class="h-8 w-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-3"></div>
             <p class="text-xs text-slate-500">Mencari Anime...</p>
         </div>
-        <div class="bg-slate-800 border-t border-slate-700 p-2">
-            <div class="h-4 w-24 bg-slate-700 rounded mx-auto animate-pulse"></div>
-        </div>
     `;
 }
 
-async function performSearch(query) {
+// C. Fetch Search (Global - Ongoing & Completed)
+async function performSearch(query, container) {
   if (query.length < 3) return;
-
   try {
     const res = await fetch(`${SEARCH_API}${query}`);
     const json = await res.json();
     const list = extractAnimeList(json);
-    renderDropdownResults(list, query);
+    renderDropdownResults(list, query, container);
   } catch (err) {
     console.error(err);
-    if (searchDropdown)
-      searchDropdown.innerHTML = `<div class="p-4 text-center text-red-400 text-xs">Gagal memuat data.</div>`;
+    container.innerHTML = `<div class="p-4 text-center text-red-400 text-xs">Gagal memuat data.</div>`;
   }
 }
 
-function renderDropdownResults(list, query) {
-  if (!searchDropdown) return;
-
-  // HEADER
+// D. Render Hasil Dropdown
+function renderDropdownResults(list, query, container) {
   let htmlContent = `
         <div class="flex justify-between items-center px-4 py-3 bg-slate-800 border-b border-slate-700">
              <div class="flex-1 min-w-0 pr-2">
@@ -153,7 +149,6 @@ function renderDropdownResults(list, query) {
              </div>
              <span class="text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full">${list.length}</span>
         </div>
-        
         <div style="max-height: 450px; overflow-y: auto;" class="custom-scrollbar bg-slate-900">
     `;
 
@@ -165,7 +160,7 @@ function renderDropdownResults(list, query) {
             </div>
         </div>`;
   } else {
-    // LIST ITEM
+    // Tampilkan 30 hasil pertama
     list.slice(0, 30).forEach((anime) => {
       const slug = anime.animeId || anime.href?.split("/").pop() || "#";
       const poster = anime.poster || "https://via.placeholder.com/100x140";
@@ -173,7 +168,6 @@ function renderDropdownResults(list, query) {
       const rating = anime.score ? `⭐ ${anime.score}` : "";
       const status = anime.status || "Unknown";
 
-      // Logic Status Color
       let statusColor = "bg-gray-600";
       if (status.toLowerCase().includes("ongoing"))
         statusColor = "bg-purple-600";
@@ -182,42 +176,43 @@ function renderDropdownResults(list, query) {
 
       htmlContent += `
                 <a href="detail.html?slug=${slug}" class="group flex gap-3 p-3 hover:bg-slate-800 transition-colors border-slate-800/50 w-full relative">
-                    
                     <div class="flex-shrink-0 w-12 h-16 rounded overflow-hidden bg-slate-800">
                         <img src="${poster}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" alt="${title}">
                     </div>
-                    
                     <div class="flex-1 min-w-0 flex flex-col justify-center">
-                        <h4 class="text-sm font-bold text-slate-200 truncate group-hover:text-purple-400 transition-colors">
-                            ${title}
-                        </h4>
-                        
+                        <h4 class="text-sm font-bold text-slate-200 truncate group-hover:text-purple-400 transition-colors">${title}</h4>
                         <div class="flex items-center gap-2 mt-1">
                             <span class="text-[10px] text-yellow-400 font-bold">${rating}</span>
                             <span class="text-[10px] text-white px-2 ${statusColor} border rounded-full border-slate-700 rounded">${status}</span>
                         </div>
                     </div>
-                </a>
-            `;
+                </a>`;
     });
-    htmlContent += `</div>`; // Tutup div Body
+    htmlContent += `</div>`;
   }
 
-  // FOOTER
+  // Tombol Lihat Semua
+  const containerId = container.id;
   htmlContent += `
-        <div class="block text-center py-4 bg-slate-800 hover:bg-purple-600 text-xs font-bold text-slate-400 hover:text-white transition-colors border-t border-slate-700 cursor-pointer" onclick="showPageResults('${query}')">
+        <div class="block text-center py-4 bg-slate-800 hover:bg-purple-600 text-xs font-bold text-slate-400 hover:text-white transition-colors border-t border-slate-700 cursor-pointer" 
+             onclick="showPageResults('${query}', '${containerId}')">
             LIHAT SEMUA HASIL
         </div>
     `;
 
-  searchDropdown.innerHTML = htmlContent;
+  container.innerHTML = htmlContent;
 }
 
-// 2. TAMPILKAN HASIL SEARCH DI GRID GENRE
-async function showPageResults(query) {
-  if (searchDropdown) searchDropdown.classList.add("hidden");
+// E. Tampilkan Hasil Search di Halaman Utama (Menggantikan Genre)
+async function showPageResults(query, dropdownIdToClose) {
+  // Hide Dropdown
+  if (dropdownIdToClose) {
+    document.getElementById(dropdownIdToClose).classList.add("hidden");
+  } else {
+    document.getElementById("searchResultsDropdown").classList.add("hidden");
+  }
 
-  // UI Update
+  // Update UI Halaman
   if (pageTitle)
     pageTitle.innerHTML = `<span class="text-purple-400">🔍 Hasil:</span> "${query}"`;
   if (pageDesc) pageDesc.style.display = "none";
@@ -233,7 +228,6 @@ async function showPageResults(query) {
     if (genreContainer) genreContainer.innerHTML = "";
 
     if (list.length > 0) {
-      // Render Card Anime
       list.forEach((anime) => renderAnimeCard(genreContainer, anime));
     } else {
       genreContainer.innerHTML = `<div class="col-span-full text-center text-slate-400 py-10">Tidak ditemukan anime.</div>`;
@@ -245,14 +239,20 @@ async function showPageResults(query) {
 }
 
 // ==========================
-// 3. LOGIKA HALAMAN GENRE
+// 4. LOGIKA HALAMAN GENRE (DEFAULT)
 // ==========================
+
+// Fungsi Reset (Dipanggil saat search kosong)
 function resetToGenreList() {
-  if (pageTitle) pageTitle.innerText = "🧩 Jelajahi Genre";
+  if (pageTitle) pageTitle.innerHTML = "🧩 Jelajahi Genre";
   if (pageDesc) pageDesc.style.display = "block";
   if (filterSection) filterSection.style.display = "block";
-  if (globalGenreList.length > 0) renderGenres(globalGenreList);
-  else loadGenres();
+
+  if (globalGenreList.length > 0) {
+    renderGenres(globalGenreList);
+  } else {
+    loadGenres();
+  }
 }
 
 async function loadGenres() {
@@ -306,7 +306,7 @@ function renderGenres(list) {
   });
 }
 
-// Render Card Anime
+// Render Card Anime (Untuk Hasil Search)
 function renderAnimeCard(container, anime) {
   const slug = anime.animeId || anime.href?.split("/").pop() || "#";
   const poster = anime.poster || "https://via.placeholder.com/300x450";
@@ -335,7 +335,7 @@ function renderAnimeCard(container, anime) {
     </a>`;
 }
 
-// 4. HELPER UTILS
+// 5. HELPER UTILS
 if (genreFilter) {
   genreFilter.addEventListener("input", (e) => {
     const term = e.target.value.toLowerCase();
@@ -357,19 +357,14 @@ function extractAnimeList(json) {
 
 function getIconForGenre(name) {
   const n = name.toLowerCase();
-  // Action & Adventure
   if (n.includes("action")) return "⚔️";
   if (n.includes("adventure")) return "🗺️";
   if (n.includes("martial")) return "🥋";
   if (n.includes("samurai")) return "🤺";
   if (n.includes("super power") || n.includes("superpower")) return "⚡";
-
-  // Comedy & Slice of Life
   if (n.includes("comedy")) return "🤣";
   if (n.includes("slice of life") || n.includes("slice")) return "🍃";
   if (n.includes("parody")) return "🤡";
-
-  // Romance & Drama
   if (n.includes("romance")) return "💖";
   if (n.includes("love")) return "💌";
   if (n.includes("drama")) return "🎭";
@@ -378,45 +373,33 @@ function getIconForGenre(name) {
   if (n.includes("josei")) return "💄";
   if (n.includes("seinen")) return "🚬";
   if (n.includes("harem")) return "👯‍♂️";
-
-  // Fantasy & Supernatural
   if (n.includes("fantasy")) return "🧙‍♂️";
   if (n.includes("magic")) return "✨";
   if (n.includes("isekai")) return "🌀";
   if (n.includes("supernatural")) return "👻";
   if (n.includes("demon")) return "👹";
   if (n.includes("vampire")) return "🧛";
-
-  // Sci-Fi & Mecha
   if (n.includes("sci-fi") || n.includes("sci")) return "🚀";
   if (n.includes("mecha")) return "🤖";
   if (n.includes("space")) return "🌌";
-
-  // Mystery, Horror, Thriller
   if (n.includes("mystery")) return "🕵️‍♂️";
   if (n.includes("horror")) return "🧟";
   if (n.includes("thriller")) return "🔪";
   if (n.includes("psychological")) return "🧠";
   if (n.includes("police")) return "👮";
-
-  // School & Sports
   if (n.includes("school")) return "🏫";
   if (n.includes("sports") || n.includes("sport")) return "⚽";
   if (n.includes("cars")) return "🏎️";
-
-  // Music & Arts
   if (n.includes("music")) return "🎵";
   if (n.includes("idol")) return "🎤";
-
-  // Others
   if (n.includes("game")) return "🎮";
   if (n.includes("military")) return "🎖️";
   if (n.includes("historical")) return "📜";
   if (n.includes("kids")) return "👶";
   if (n.includes("food") || n.includes("gourmet")) return "🍖";
   if (n.includes("ecchi")) return "💋";
-
   return "📺";
 }
 
+// Load Awal
 loadGenres();
