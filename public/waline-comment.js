@@ -6,7 +6,7 @@ export function loadComments() {
   init({
     el: "#waline", // ID dari div di HTML
 
-    serverURL: "https://mangnime-comments.vercel.app/api/waline",
+    serverURL: "https://mangnimecomments.vercel.app/",
 
     // Konfigurasi Tampilan MangNime
     lang: "id", // Bahasa Indonesia
